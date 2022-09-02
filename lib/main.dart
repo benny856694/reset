@@ -39,22 +39,20 @@ class MyHomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    //final counter = ref.watch(counterProvider);
     final deviceType = ref.watch(deviceTypeProvider);
-    final isLoginButtonEnabled = useState(false);
-    final ipAddressController = useTextEditingController();
     final isLoggedIn = ref.watch(isLoggedinProvider);
     final isLogging = useState(false);
-    final passwordController = useTextEditingController();
     final telnet = useState<Telnet?>(null);
     final logs = useState(<LogItem>[]);
+    final customPassword = useState('');
+    final ipAddress = useState('');
     final scrollController = useScrollController();
     bool enableLogin() {
       var enabled = !isLogging.value;
-      enabled = enabled && ipAddressExp.hasMatch(ipAddressController.text);
+      enabled = enabled && ipAddressExp.hasMatch(ipAddress.value);
       var dt = ref.read(deviceTypeProvider.notifier);
       if (dt.state == DeviceType.otherModel) {
-        enabled = enabled && passwordController.text.isNotEmpty;
+        enabled = enabled && customPassword.value.isNotEmpty;
       }
       return enabled;
     }
@@ -78,24 +76,24 @@ class MyHomePage extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               TextField(
-                controller: ipAddressController,
+                // controller: ipAddressController,
                 decoration: const InputDecoration(
                   label: Text("Ip Address:"),
                 ),
                 onChanged: (value) {
-                  isLoginButtonEnabled.value = enableLogin();
+                  ipAddress.value = value;
                 },
               ),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: passwordController,
+                      //controller: passwordController,
                       decoration: const InputDecoration(
                         label: Text("Password:"),
                       ),
                       onChanged: (value) {
-                        isLoginButtonEnabled.value = enableLogin();
+                        customPassword.value = value;
                       },
                       enabled: deviceType == DeviceType.otherModel,
                       obscureText: true,
@@ -121,7 +119,6 @@ class MyHomePage extends HookConsumerWidget {
                               onChanged: (value) {
                                 ref.read(deviceTypeProvider.notifier).state =
                                     value!;
-                                isLoginButtonEnabled.value = enableLogin();
                               },
                             ),
                             Text(
@@ -142,7 +139,7 @@ class MyHomePage extends HookConsumerWidget {
                           ref.read(isLoggedinProvider.notifier).state = false;
                         } else {
                           isLogging.value = true;
-                          var pwd = passwordController.text;
+                          var pwd = customPassword.value;
                           var dt = ref.read(deviceTypeProvider.notifier);
                           if (dt.state != DeviceType.otherModel) {
                             pwd = dt.state == DeviceType.oldModel
@@ -151,7 +148,7 @@ class MyHomePage extends HookConsumerWidget {
                           }
 
                           telnet.value = Telnet(
-                            ipAddressController.text,
+                            ipAddress.value,
                             23,
                             'root',
                             pwd,
