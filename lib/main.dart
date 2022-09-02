@@ -136,33 +136,39 @@ class MyHomePage extends HookConsumerWidget {
               ElevatedButton.icon(
                 onPressed: isLoginButtonEnabled.value
                     ? () async {
-                        var pwd = passwordController.text;
-                        var dt = ref.read(deviceTypeProvider.notifier);
-                        if (dt.state != DeviceType.otherModel) {
-                          pwd = dt.state == DeviceType.oldModel
-                              ? 'antslq'
-                              : 'haantslq';
-                        }
+                        if (isLoggedin) {
+                          telnet.value?.terminate();
+                          ref.read(isLoggedinProvider.notifier).state = false;
+                        } else {
+                          var pwd = passwordController.text;
+                          var dt = ref.read(deviceTypeProvider.notifier);
+                          if (dt.state != DeviceType.otherModel) {
+                            pwd = dt.state == DeviceType.oldModel
+                                ? 'antslq'
+                                : 'haantslq';
+                          }
 
-                        telnet.value = Telnet(
-                          ipAddressController.text,
-                          23,
-                          'root',
-                          pwd,
-                          echoEnabled: false,
-                          onLog: (log) {
-                            final maskedLog =
-                                log.log.replaceAll(RegExp(r'antslq'), '******');
-                            logs.value = [
-                              ...logs.value,
-                              LogItem(log.id, maskedLog)
-                            ];
-                          },
-                          onLogin: () {
-                            ref.read(isLoggedinProvider.notifier).state = true;
-                          },
-                        );
-                        await telnet.value?.startConnect();
+                          telnet.value = Telnet(
+                            ipAddressController.text,
+                            23,
+                            'root',
+                            pwd,
+                            echoEnabled: false,
+                            onLog: (log) {
+                              final maskedLog = log.log
+                                  .replaceAll(RegExp(r'antslq'), '******');
+                              logs.value = [
+                                ...logs.value,
+                                LogItem(log.id, maskedLog)
+                              ];
+                            },
+                            onLogin: () {
+                              ref.read(isLoggedinProvider.notifier).state =
+                                  true;
+                            },
+                          );
+                          await telnet.value?.startConnect();
+                        }
                       }
                     : null,
                 icon: const Icon(Icons.login),
