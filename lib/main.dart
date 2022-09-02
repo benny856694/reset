@@ -151,7 +151,12 @@ class MyHomePage extends HookConsumerWidget {
                           pwd,
                           echoEnabled: false,
                           onLog: (log) {
-                            logs.value = [...logs.value, log];
+                            final maskedLog =
+                                log.log.replaceAll(RegExp(r'antslq'), '******');
+                            logs.value = [
+                              ...logs.value,
+                              LogItem(log.id, maskedLog)
+                            ];
                           },
                           onLogin: () {
                             ref.read(isLoggedinProvider.notifier).state = true;
