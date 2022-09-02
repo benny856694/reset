@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-const host = "127.0.0.1";
-const port = 23;
-const username = "root";
-const password = "admin";
-const echoEnabled = true;
+import 'package:reset/extensions.dart';
+import 'package:reset/telnet.dart';
 
 enum DeviceType { oldModel, newModel, otherModel }
 
@@ -50,23 +46,20 @@ class MyHomePage extends HookConsumerWidget {
     final ipAddressController = useTextEditingController();
     final isLoggedin = ref.watch(isLoggedinProvider);
     final passwordController = useTextEditingController();
-
+    Telnet? telnet;
     bool enableLogin() {
       var enabled = true;
       enabled = enabled && ipAddressExp.hasMatch(ipAddressController.text);
       var dt = ref.read(deviceTypeProvider.notifier);
-      print('device type: $dt');
       if (dt.state == DeviceType.otherModel) {
         enabled = enabled && passwordController.text.isNotEmpty;
       }
-      print('enable: $enabled');
       return enabled;
     }
 
     ref.listen(
       deviceTypeProvider,
       (previous, next) {
-        print('new value: $next');
         //isLoginButtonEnabled.value = enableLogin();
       },
     );
@@ -141,9 +134,26 @@ class MyHomePage extends HookConsumerWidget {
               ),
               ElevatedButton.icon(
                 onPressed: isLoginButtonEnabled.value
-                    ? () {
-                        var v = ref.read(isLoggedinProvider.notifier).state;
-                        ref.read(isLoggedinProvider.notifier).state = !v;
+                    ? () async {
+                        var pwd = passwordController.text;
+                        var dt = ref.read(deviceTypeProvider.notifier);
+                        if (dt.state != DeviceType.otherModel) {
+                          pwd = dt.state == DeviceType.oldModel
+                              ? 'antslq'
+                              : 'haantslq';
+                        }
+                        telnet = Telnet(
+                          ipAddressController.text,
+                          23,
+                          'root',
+                          pwd,
+                          onLog: (msg) {
+                            msg.log();
+                          },
+                          onLogin: () {
+                            ref.read(isLoggedinProvider.notifier).state = true;
+                          },
+                        );
                       }
                     : null,
                 icon: const Icon(Icons.login),
@@ -153,7 +163,11 @@ class MyHomePage extends HookConsumerWidget {
                 height: 8.0,
               ),
               ElevatedButton.icon(
-                onPressed: isLoggedin ? () {} : null,
+                onPressed: isLoggedin
+                    ? () {
+                        telnet?.write("reboot \r\n");
+                      }
+                    : null,
                 icon: const Icon(Icons.restore),
                 label: const Text("Reset Config"),
               ),
