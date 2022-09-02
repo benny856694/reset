@@ -91,22 +91,23 @@ class MyHomePage extends HookConsumerWidget {
                   isLoginButtonEnabled.value = enableLogin();
                 },
               ),
-              if (deviceType == DeviceType.otherModel)
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: passwordController,
-                        decoration: const InputDecoration(
-                          label: Text("Password:"),
-                        ),
-                        onChanged: (value) {
-                          isLoginButtonEnabled.value = enableLogin();
-                        },
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: passwordController,
+                      decoration: const InputDecoration(
+                        label: Text("Password:"),
                       ),
-                    )
-                  ],
-                ),
+                      onChanged: (value) {
+                        isLoginButtonEnabled.value = enableLogin();
+                      },
+                      enabled: deviceType == DeviceType.otherModel,
+                      obscureText: true,
+                    ),
+                  )
+                ],
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
