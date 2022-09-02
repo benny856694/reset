@@ -43,13 +43,14 @@ class MyHomePage extends HookConsumerWidget {
     final deviceType = ref.watch(deviceTypeProvider);
     final isLoginButtonEnabled = useState(false);
     final ipAddressController = useTextEditingController();
-    final isLoggedin = ref.watch(isLoggedinProvider);
+    final isLoggedIn = ref.watch(isLoggedinProvider);
+    final isLogging = useState(false);
     final passwordController = useTextEditingController();
     final telnet = useState<Telnet?>(null);
     final logs = useState(<LogItem>[]);
     final scrollController = useScrollController();
     bool enableLogin() {
-      var enabled = true;
+      var enabled = !isLogging.value;
       enabled = enabled && ipAddressExp.hasMatch(ipAddressController.text);
       var dt = ref.read(deviceTypeProvider.notifier);
       if (dt.state == DeviceType.otherModel) {
@@ -134,12 +135,13 @@ class MyHomePage extends HookConsumerWidget {
                 ),
               ),
               ElevatedButton.icon(
-                onPressed: isLoginButtonEnabled.value
+                onPressed: enableLogin()
                     ? () async {
-                        if (isLoggedin) {
+                        if (isLoggedIn) {
                           telnet.value?.terminate();
                           ref.read(isLoggedinProvider.notifier).state = false;
                         } else {
+                          isLogging.value = true;
                           var pwd = passwordController.text;
                           var dt = ref.read(deviceTypeProvider.notifier);
                           if (dt.state != DeviceType.otherModel) {
@@ -168,17 +170,25 @@ class MyHomePage extends HookConsumerWidget {
                             },
                           );
                           await telnet.value?.startConnect();
+                          isLogging.value = false;
                         }
                       }
                     : null,
-                icon: const Icon(Icons.login),
-                label: !isLoggedin ? const Text('Login') : const Text("Logout"),
+                icon: isLogging.value
+                    ? const SizedBox.square(
+                        dimension: 16.0,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.0,
+                        ),
+                      )
+                    : const Icon(Icons.login),
+                label: !isLoggedIn ? const Text('Login') : const Text("Logout"),
               ),
               const SizedBox(
                 height: 8.0,
               ),
               ElevatedButton.icon(
-                onPressed: isLoggedin
+                onPressed: isLoggedIn
                     ? () {
                         telnet.value?.write("reboot \r\n");
                       }
