@@ -182,13 +182,27 @@ class MyHomePage extends HookConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("日志"),
+                    Row(
+                      children: [
+                        const Text("日志"),
+                        IconButton(
+                          onPressed: () {
+                            logs.value = [];
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                        )
+                      ],
+                    ),
                     Expanded(
                       child: ListView.builder(
                         itemCount: logs.value.length,
                         itemBuilder: (BuildContext context, int index) {
                           final item = logs.value[index];
                           return ListTile(
+                            dense: true,
                             key: ValueKey(
                               item.id,
                             ),
