@@ -182,7 +182,9 @@ class MyHomePage extends HookConsumerWidget {
                         ),
                       )
                     : const Icon(Icons.login),
-                label: !isLoggedIn ? const Text('Login') : const Text("Logout"),
+                label: !isLoggedIn
+                    ? Text(isLogging.value ? 'Logging...' : 'Login')
+                    : const Text("Logout"),
               ),
               const SizedBox(
                 height: 8.0,
