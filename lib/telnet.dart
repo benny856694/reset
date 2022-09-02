@@ -1,5 +1,12 @@
 import 'package:telnet/telnet.dart';
 
+class LogItem {
+  final int id;
+  final String log;
+
+  LogItem(this.id, this.log);
+}
+
 class Telnet {
   final String host;
   final int port;
@@ -7,10 +14,12 @@ class Telnet {
   final String password;
   final bool? echoEnabled;
   final void Function()? onLogin;
-  final void Function(String msg)? onLog;
+  final void Function(bool success)? onConnect;
+  final void Function(LogItem msg)? onLog;
   late final ITLConnectionTask _task;
   late final ITelnetClient? _client;
   bool _hasLogin = false;
+  var id = 0;
   final Map<TLOpt, List<TLMsg>> _doReplyMap;
   final Map<TLOpt, List<TLMsg>> _willReplyMap;
 
@@ -21,6 +30,7 @@ class Telnet {
     this.password, {
     this.echoEnabled = true,
     this.onLogin,
+    this.onConnect,
     this.onLog,
   })  : _doReplyMap = <TLOpt, List<TLMsg>>{
           TLOpt.echo: [
@@ -67,7 +77,7 @@ class Telnet {
     );
     await _task.waitDone();
     _client = _task.client;
-    onLog?.call(_client == null ? "connect failed" : "connect succeed");
+    onLog?.call(LogItem(id++, _client == null ? "connect failed" : "connect succeed"));
   }
 
   void write(String command) {
@@ -82,9 +92,9 @@ class Telnet {
 
   void _onEvent(TelnetClient? client, TLMsgEvent event) {
     if (event.type == TLMsgEventType.write) {
-      onLog?.call("[WRITE] ${event.msg}");
+      onLog?.call(LogItem(id++, "[WRITE] ${event.msg}"));
     } else if (event.type == TLMsgEventType.read) {
-      onLog?.call("[READ] ${event.msg}");
+      onLog?.call(LogItem(id++, "[READ] ${event.msg}"));
 
       if (event.msg is TLOptMsg) {
         final cmd = (event.msg as TLOptMsg).cmd; // Telnet Negotiation Command.
@@ -121,7 +131,7 @@ class Telnet {
         final text = (event.msg as TLTextMsg).text.toLowerCase();
         if (text.contains("welcome")) {
           _hasLogin = true;
-          onLog?.call("[INFO] Login OK!");
+          onLog?.call(LogItem(id++, "[INFO] Login OK!"));
           onLogin?.call();
         } else if (text.contains("login:") || text.contains("username:")) {
           // Write [username].
@@ -135,10 +145,10 @@ class Telnet {
   }
 
   void _onError(TelnetClient? client, dynamic error) {
-    onLog?.call("[ERROR] $error");
+    onLog?.call(LogItem(id++, "[ERROR] $error"));
   }
 
   void _onDone(TelnetClient? client) {
-    onLog?.call("[DONE]");
+    onLog?.call(LogItem(id++, "[DONE]"));
   }
 }

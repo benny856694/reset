@@ -47,6 +47,7 @@ class MyHomePage extends HookConsumerWidget {
     final isLoggedin = ref.watch(isLoggedinProvider);
     final passwordController = useTextEditingController();
     final telnet = useState<Telnet?>(null);
+    final logs = useState(<LogItem>[]);
     bool enableLogin() {
       var enabled = true;
       enabled = enabled && ipAddressExp.hasMatch(ipAddressController.text);
@@ -149,8 +150,8 @@ class MyHomePage extends HookConsumerWidget {
                           'root',
                           pwd,
                           echoEnabled: false,
-                          onLog: (msg) {
-                            msg.log();
+                          onLog: (log) {
+                            logs.value = [...logs.value, log];
                           },
                           onLogin: () {
                             ref.read(isLoggedinProvider.notifier).state = true;
@@ -180,10 +181,21 @@ class MyHomePage extends HookConsumerWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("日志"),
+                  children: [
+                    const Text("日志"),
                     Expanded(
-                      child: Text("logs"),
+                      child: ListView.builder(
+                        itemCount: logs.value.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final item = logs.value[index];
+                          return ListTile(
+                            key: ValueKey(
+                              item.id,
+                            ),
+                            title: Text(item.log),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
