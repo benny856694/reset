@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:reset/extensions.dart';
 import 'package:reset/telnet.dart';
 
 enum DeviceType { oldModel, newModel, otherModel }
@@ -48,6 +47,7 @@ class MyHomePage extends HookConsumerWidget {
     final passwordController = useTextEditingController();
     final telnet = useState<Telnet?>(null);
     final logs = useState(<LogItem>[]);
+    final scrollController = useScrollController();
     bool enableLogin() {
       var enabled = true;
       enabled = enabled && ipAddressExp.hasMatch(ipAddressController.text);
@@ -209,6 +209,7 @@ class MyHomePage extends HookConsumerWidget {
                             title: Text(item.log),
                           );
                         },
+                        controller: scrollController,
                       ),
                     ),
                   ],
