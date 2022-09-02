@@ -46,7 +46,7 @@ class MyHomePage extends HookConsumerWidget {
     final ipAddressController = useTextEditingController();
     final isLoggedin = ref.watch(isLoggedinProvider);
     final passwordController = useTextEditingController();
-    Telnet? telnet;
+    final telnet = useState<Telnet?>(null);
     bool enableLogin() {
       var enabled = true;
       enabled = enabled && ipAddressExp.hasMatch(ipAddressController.text);
@@ -142,11 +142,13 @@ class MyHomePage extends HookConsumerWidget {
                               ? 'antslq'
                               : 'haantslq';
                         }
-                        telnet = Telnet(
+
+                        telnet.value = Telnet(
                           ipAddressController.text,
                           23,
                           'root',
                           pwd,
+                          echoEnabled: false,
                           onLog: (msg) {
                             msg.log();
                           },
@@ -154,6 +156,7 @@ class MyHomePage extends HookConsumerWidget {
                             ref.read(isLoggedinProvider.notifier).state = true;
                           },
                         );
+                        await telnet.value?.startConnect();
                       }
                     : null,
                 icon: const Icon(Icons.login),
@@ -165,7 +168,7 @@ class MyHomePage extends HookConsumerWidget {
               ElevatedButton.icon(
                 onPressed: isLoggedin
                     ? () {
-                        telnet?.write("reboot \r\n");
+                        telnet.value?.write("reboot \r\n");
                       }
                     : null,
                 icon: const Icon(Icons.restore),
