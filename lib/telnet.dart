@@ -77,7 +77,8 @@ class Telnet {
     );
     await _task.waitDone();
     _client = _task.client;
-    onLog?.call(LogItem(id++, _client == null ? "connect failed" : "connect succeed"));
+    onLog?.call(
+        LogItem(id++, _client == null ? "connect failed" : "connect succeed"));
   }
 
   void write(String command) {
@@ -92,7 +93,7 @@ class Telnet {
 
   void _onEvent(TelnetClient? client, TLMsgEvent event) {
     if (event.type == TLMsgEventType.write) {
-      onLog?.call(LogItem(id++, "[WRITE] ${event.msg}"));
+      //onLog?.call(LogItem(id++, "[WRITE] ${event.msg}"));
     } else if (event.type == TLMsgEventType.read) {
       onLog?.call(LogItem(id++, "[READ] ${event.msg}"));
 
