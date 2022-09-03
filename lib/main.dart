@@ -166,8 +166,8 @@ class MyHomePage extends HookConsumerWidget {
               ElevatedButton.icon(
                 onPressed: enableLogin()
                     ? () async {
+                        telnet.value?.terminate();
                         if (isLoggedIn) {
-                          telnet.value?.terminate();
                           ref.read(isLoggedinProvider.notifier).state = false;
                         } else {
                           isLogging.value = true;

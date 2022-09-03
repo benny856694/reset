@@ -96,8 +96,9 @@ class Telnet {
   }
 
   void _onEvent(TelnetClient? client, TLMsgEvent event) {
-    if (event.type == TLMsgEventType.write) {
-      //onLog?.call(LogItem(id++, "[WRITE] ${event.msg}"));
+    if (event.type == TLMsgEventType.write &&
+        event.msg.runtimeType != TLOptMsg) {
+      //  onLog?.call(LogItem(id++, "[WRITE] ${event.msg}"));
     } else if (event.type == TLMsgEventType.read) {
       if (event.msg.runtimeType != TLOptMsg) {
         onLog?.call(LogItem(id++, "[READ] ${event.msg}"));
@@ -136,7 +137,7 @@ class Telnet {
         }
       } else if (!_hasLogin && event.msg is TLTextMsg) {
         final text = (event.msg as TLTextMsg).text.toLowerCase();
-        if (text.contains("welcome")) {
+        if (text.contains('#')) {
           _hasLogin = true;
           onLog?.call(LogItem(id++, "[INFO] Login OK!"));
           onLogin?.call();
