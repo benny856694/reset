@@ -77,8 +77,6 @@ class Telnet {
     );
     await _task.waitDone();
     _client = _task.client;
-    onLog?.call(
-        LogItem(id++, _client == null ? "connect failed" : "connect succeed"));
   }
 
   void write(String command) {
@@ -101,7 +99,9 @@ class Telnet {
     if (event.type == TLMsgEventType.write) {
       //onLog?.call(LogItem(id++, "[WRITE] ${event.msg}"));
     } else if (event.type == TLMsgEventType.read) {
-      onLog?.call(LogItem(id++, "[READ] ${event.msg}"));
+      if (event.msg.runtimeType != TLOptMsg) {
+        onLog?.call(LogItem(id++, "[READ] ${event.msg}"));
+      }
 
       if (event.msg is TLOptMsg) {
         final cmd = (event.msg as TLOptMsg).cmd; // Telnet Negotiation Command.
