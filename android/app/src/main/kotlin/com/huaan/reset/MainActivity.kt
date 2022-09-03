@@ -1,4 +1,4 @@
-package com.example.reset
+package com.huaan.reset
 
 import io.flutter.embedding.android.FlutterActivity
 

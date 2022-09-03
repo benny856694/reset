@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reset/telnet.dart';
@@ -26,12 +27,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       supportedLocales: const [
         Locale("en", "US"),
         Locale("zh", "CN"),
       ],
       home: I18n(
-        initialLocale: const Locale('zh'),
+        //initialLocale: const Locale('zh'),
         child: MyHomePage(),
       ),
     );
@@ -110,32 +116,51 @@ class MyHomePage extends HookConsumerWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                    Text(t.deviceType.i18n),
-                    const SizedBox(
-                      width: 32,
-                    ),
-                    ...DeviceType.values.map(
-                      (e) => Expanded(
-                        child: Row(
-                          children: [
-                            Radio(
-                              value: e,
-                              groupValue: deviceType,
-                              onChanged: (value) {
-                                ref.read(deviceTypeProvider.notifier).state =
-                                    value!;
-                              },
-                            ),
-                            Text(
-                              e.name.i18n,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
+                child: LayoutBuilder(
+                  builder: (ctx, cs) {
+                    const isLargeScreen = true;
+                    // MediaQuery.of(ctx).size.width < 600;
+                    final options = DeviceType.values
+                        .map(
+                          (e) => Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Radio(
+                                visualDensity: VisualDensity.compact,
+                                key: ValueKey(e.name),
+                                value: e,
+                                groupValue: deviceType,
+                                onChanged: (value) {
+                                  ref.read(deviceTypeProvider.notifier).state =
+                                      value!;
+                                },
+                              ),
+                              Text(
+                                e.name.i18n,
+                              ),
+                            ],
+                          ),
+                        )
+                        .toList();
+                    return Row(
+                      //crossAxisAlignment: CrossAxisAlignment.baseline,
+                      children: [
+                        Text(t.deviceType.i18n),
+                        isLargeScreen
+                            ? Expanded(
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: options,
+                                ),
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: options,
+                              )
+                      ],
+                    );
+                  },
                 ),
               ),
               ElevatedButton.icon(
