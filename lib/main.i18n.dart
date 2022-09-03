@@ -12,6 +12,7 @@ const loggingin = 'logging';
 const logout = "logout";
 const resetCfg = "resetCfg";
 const log = "log";
+const reboot = 'reboot';
 
 extension Localization on String {
   static const _t = Translations.from("en_us", {
@@ -56,13 +57,17 @@ extension Localization on String {
       "zh": "退出登录",
     },
     resetCfg: {
-      "en_us": "Reset Config",
+      "en_us": "Reset Cfg",
       "zh": "重置设置",
     },
     log: {
       "en_us": "Logs",
       "zh": "日志",
     },
+    reboot: {
+      "en_us": "Reboot",
+      "zh": "重启",
+    }
   });
 
   String get i18n => localize(this, _t);

@@ -196,7 +196,7 @@ class MyHomePage extends HookConsumerWidget {
               ElevatedButton.icon(
                 onPressed: isLoggedIn
                     ? () {
-                        telnet.value?.write("reboot \r\n");
+                        telnet.value?.writeline("reboot");
                       }
                     : null,
                 icon: const Icon(Icons.restore),

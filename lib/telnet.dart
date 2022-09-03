@@ -87,6 +87,12 @@ class Telnet {
     }
   }
 
+  void writeline(String command) {
+    if (_hasLogin) {
+      write('$command \r\n');
+    }
+  }
+
   void terminate() async {
     await _client?.terminate();
   }
