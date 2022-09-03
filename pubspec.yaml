@@ -39,6 +39,7 @@ dependencies:
   telnet: ^1.0.7
   hooks_riverpod: ^1.0.4
   flutter_hooks: ^0.18.5+1
+  i18n_extension: ^5.0.1
 
 dev_dependencies:
   flutter_test:

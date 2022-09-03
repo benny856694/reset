@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reset/telnet.dart';
+import 'package:i18n_extension/i18n_widget.dart';
+import 'main.i18n.dart' as t;
 
-enum DeviceType { oldModel, newModel, otherModel }
+enum DeviceType { oldModel, newModel, unknownModel }
 
 final counterProvider = StateProvider((ref) => 0);
 final deviceTypeProvider = StateProvider((_) => DeviceType.oldModel);
@@ -24,15 +26,22 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      supportedLocales: const [
+        Locale("en", "US"),
+        Locale("zh", "CN"),
+      ],
+      home: I18n(
+        initialLocale: const Locale('zh'),
+        child: MyHomePage(),
+      ),
     );
   }
 }
 
 class MyHomePage extends HookConsumerWidget {
-  MyHomePage({super.key, required this.title});
+  MyHomePage({super.key});
 
-  final String title;
+  final String title = t.appTitle.i18n;
 
   final ipAddressExp = RegExp(
       r'\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b');
@@ -51,7 +60,7 @@ class MyHomePage extends HookConsumerWidget {
       var enabled = !isLogging.value;
       enabled = enabled && ipAddressExp.hasMatch(ipAddress.value);
       var dt = ref.read(deviceTypeProvider.notifier);
-      if (dt.state == DeviceType.otherModel) {
+      if (dt.state == DeviceType.unknownModel) {
         enabled = enabled && customPassword.value.isNotEmpty;
       }
       return enabled;
@@ -76,9 +85,8 @@ class MyHomePage extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               TextField(
-                // controller: ipAddressController,
-                decoration: const InputDecoration(
-                  label: Text("Ip Address:"),
+                decoration: InputDecoration(
+                  label: Text(t.ipAddress.i18n),
                 ),
                 onChanged: (value) {
                   ipAddress.value = value;
@@ -88,14 +96,13 @@ class MyHomePage extends HookConsumerWidget {
                 children: [
                   Expanded(
                     child: TextField(
-                      //controller: passwordController,
-                      decoration: const InputDecoration(
-                        label: Text("Password:"),
+                      decoration: InputDecoration(
+                        label: Text(t.password.i18n),
                       ),
                       onChanged: (value) {
                         customPassword.value = value;
                       },
-                      enabled: deviceType == DeviceType.otherModel,
+                      enabled: deviceType == DeviceType.unknownModel,
                       obscureText: true,
                     ),
                   )
@@ -105,7 +112,7 @@ class MyHomePage extends HookConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   children: [
-                    const Text("Device Type:"),
+                    Text(t.deviceType.i18n),
                     const SizedBox(
                       width: 32,
                     ),
@@ -122,7 +129,7 @@ class MyHomePage extends HookConsumerWidget {
                               },
                             ),
                             Text(
-                              e.name,
+                              e.name.i18n,
                             ),
                           ],
                         ),
@@ -141,7 +148,7 @@ class MyHomePage extends HookConsumerWidget {
                           isLogging.value = true;
                           var pwd = customPassword.value;
                           var dt = ref.read(deviceTypeProvider.notifier);
-                          if (dt.state != DeviceType.otherModel) {
+                          if (dt.state != DeviceType.unknownModel) {
                             pwd = dt.state == DeviceType.oldModel
                                 ? 'antslq'
                                 : 'haantslq';
@@ -180,8 +187,8 @@ class MyHomePage extends HookConsumerWidget {
                       )
                     : const Icon(Icons.login),
                 label: !isLoggedIn
-                    ? Text(isLogging.value ? 'Logging...' : 'Login')
-                    : const Text("Logout"),
+                    ? Text(isLogging.value ? t.loggingin.i18n : t.login.i18n)
+                    : Text(t.logout.i18n),
               ),
               const SizedBox(
                 height: 8.0,
@@ -193,7 +200,7 @@ class MyHomePage extends HookConsumerWidget {
                       }
                     : null,
                 icon: const Icon(Icons.restore),
-                label: const Text("Reset Config"),
+                label: Text(t.resetCfg.i18n),
               ),
               const SizedBox(
                 height: 8.0,
@@ -204,7 +211,7 @@ class MyHomePage extends HookConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Text("日志"),
+                        Text(t.log.i18n),
                         IconButton(
                           onPressed: () {
                             logs.value = [];
