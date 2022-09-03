@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends HookConsumerWidget {
   MyHomePage({super.key});
 
-  final String title = t.appTitle.i18n;
+  //final String title = t.appTitle.i18n;
 
   final ipAddressExp = RegExp(
       r'\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b');
@@ -81,7 +81,7 @@ class MyHomePage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(t.appTitle.i18n),
       ),
       body: Center(
         child: Padding(
