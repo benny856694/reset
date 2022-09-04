@@ -5,8 +5,11 @@ const ipAddress = "ipAddress";
 const password = "password";
 const deviceType = "deviceType";
 const oldModel = "oldModel";
+const oldModelDetails = 'oldModelDetails';
 const newModel = "newModel";
+const newModelDetails = 'newModelDetails';
 const unknowModel = "unknownModel";
+const unknownModelDetails = "unknownModelDetails";
 const login = "login";
 const loggingin = 'logging';
 const logout = "logout";
@@ -67,6 +70,18 @@ extension Localization on String {
     reboot: {
       "en_us": "Reboot",
       "zh": "重启",
+    },
+    oldModelDetails: {
+      "en_us": "EV300,DV300",
+      //"zh": "重启",
+    },
+    newModelDetails: {
+      "en_us": "DV350,EV500",
+      //"zh": "重启",
+    },
+    unknownModelDetails: {
+      "en_us": "Please input password",
+      "zh": "请输入密码",
     }
   });
 

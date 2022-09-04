@@ -10,6 +10,22 @@ enum DeviceType { oldModel, newModel, unknownModel }
 
 final counterProvider = StateProvider((ref) => 0);
 final deviceTypeProvider = StateProvider((_) => DeviceType.oldModel);
+final deviceTypeDescProvider = Provider((ref) {
+  final dt = ref.watch(deviceTypeProvider);
+  var result = '';
+  switch (dt) {
+    case DeviceType.newModel:
+      result = t.newModelDetails.i18n;
+      break;
+    case DeviceType.oldModel:
+      result = t.oldModelDetails.i18n;
+      break;
+    case DeviceType.unknownModel:
+      result = t.unknownModelDetails.i18n;
+      break;
+  }
+  return result;
+});
 final isLoggedinProvider = StateProvider((_) => false);
 
 void main() async {
@@ -62,6 +78,8 @@ class MyHomePage extends HookConsumerWidget {
     final customPassword = useState('');
     final ipAddress = useState('');
     final scrollController = useScrollController();
+    final deviceTypeDetails = ref.watch(deviceTypeDescProvider);
+
     bool enableLogin() {
       var enabled = !isLogging.value;
       enabled = enabled && ipAddressExp.hasMatch(ipAddress.value);
@@ -102,6 +120,7 @@ class MyHomePage extends HookConsumerWidget {
                 children: [
                   Expanded(
                     child: TextField(
+                      keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         label: Text(t.password.i18n),
                       ),
@@ -115,10 +134,10 @@ class MyHomePage extends HookConsumerWidget {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: LayoutBuilder(
-                  builder: (ctx, cs) {
-                    const isLargeScreen = true;
+                  builder: (buildContext, constraints) {
+                    //const isLargeScreen = true;
                     // MediaQuery.of(ctx).size.width < 600;
                     final options = DeviceType.values
                         .map(
@@ -142,22 +161,17 @@ class MyHomePage extends HookConsumerWidget {
                           ),
                         )
                         .toList();
-                    return Row(
-                      //crossAxisAlignment: CrossAxisAlignment.baseline,
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(t.deviceType.i18n),
-                        isLargeScreen
-                            ? Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: options,
-                                ),
-                              )
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: options,
-                              )
+                        Text('${t.deviceType.i18n} ($deviceTypeDetails)'),
+                        const SizedBox(
+                          height: 8.0,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: options,
+                        ),
                       ],
                     );
                   },
@@ -170,6 +184,7 @@ class MyHomePage extends HookConsumerWidget {
                         if (isLoggedIn) {
                           ref.read(isLoggedinProvider.notifier).state = false;
                         } else {
+                          logs.value = [];
                           isLogging.value = true;
                           var pwd = customPassword.value;
                           var dt = ref.read(deviceTypeProvider.notifier);
@@ -193,13 +208,13 @@ class MyHomePage extends HookConsumerWidget {
                                 LogItem(log.id, maskedLog)
                               ];
                             },
-                            onLogin: () {
+                            onLogin: (success) {
                               ref.read(isLoggedinProvider.notifier).state =
-                                  true;
+                                  success;
+                              isLogging.value = false;
                             },
                           );
                           await telnet.value?.startConnect();
-                          isLogging.value = false;
                         }
                       }
                     : null,

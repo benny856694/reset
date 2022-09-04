@@ -13,7 +13,7 @@ class Telnet {
   final String username;
   final String password;
   final bool? echoEnabled;
-  final void Function()? onLogin;
+  final void Function(bool success)? onLogin;
   final void Function(bool success)? onConnect;
   final void Function(LogItem msg)? onLog;
   late final ITLConnectionTask _task;
@@ -77,6 +77,9 @@ class Telnet {
     );
     await _task.waitDone();
     _client = _task.client;
+    onConnect?.call(
+      _client == null ? false : true,
+    );
   }
 
   void write(String command) {
@@ -137,10 +140,13 @@ class Telnet {
         }
       } else if (!_hasLogin && event.msg is TLTextMsg) {
         final text = (event.msg as TLTextMsg).text.toLowerCase();
-        if (text.contains('#')) {
+        if (text.contains('login incorrect')) {
+          client!.terminate();
+          onLogin?.call(false);
+        } else if (text.contains('#')) {
           _hasLogin = true;
           onLog?.call(LogItem(id++, "[INFO] Login OK!"));
-          onLogin?.call();
+          onLogin?.call(true);
         } else if (text.contains("login:") || text.contains("username:")) {
           // Write [username].
           client!.write(TLTextMsg("$username\r\n"));
@@ -154,6 +160,9 @@ class Telnet {
 
   void _onError(TelnetClient? client, dynamic error) {
     onLog?.call(LogItem(id++, "[ERROR] $error"));
+    if (!_hasLogin) {
+      onLogin?.call(false);
+    }
   }
 
   void _onDone(TelnetClient? client) {
