@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:reset/commands.dart';
 import 'package:reset/telnet.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'main.i18n.dart' as t;
@@ -233,14 +234,36 @@ class MyHomePage extends HookConsumerWidget {
               const SizedBox(
                 height: 8.0,
               ),
-              ElevatedButton.icon(
-                onPressed: isLoggedIn
-                    ? () {
-                        telnet.value?.writeline("reboot");
-                      }
-                    : null,
-                icon: const Icon(Icons.restore),
-                label: Text(t.resetCfg.i18n),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: isLoggedIn
+                          ? () {
+                              telnet.value?.writeline(resetCfgCmd(true));
+                            }
+                          : null,
+                      icon: const Icon(Icons.restore),
+                      label: Text(t.resetCfg.i18n),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: isLoggedIn
+                          ? () {
+                              telnet.value?.writeline(rebootCmd());
+                            }
+                          : null,
+                      icon: const Icon(Icons.play_arrow),
+                      label: Text(
+                        t.reboot.i18n,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(
                 height: 8.0,
