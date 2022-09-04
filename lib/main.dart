@@ -110,6 +110,7 @@ class MyHomePage extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               TextField(
+                keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   label: Text(t.ipAddress.i18n),
                 ),
@@ -121,7 +122,6 @@ class MyHomePage extends HookConsumerWidget {
                 children: [
                   Expanded(
                     child: TextField(
-                      keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         label: Text(t.password.i18n),
                       ),
