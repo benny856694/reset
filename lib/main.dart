@@ -313,12 +313,12 @@ class MyHomePage extends HookConsumerWidget {
                         itemCount: logs.value.length,
                         itemBuilder: (BuildContext context, int index) {
                           final item = logs.value[index];
-                          return ListTile(
-                            dense: true,
-                            key: ValueKey(
-                              item.id,
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 2.0),
+                            child: Text(
+                              key: ValueKey(item.id),
+                              item.log,
                             ),
-                            title: Text(item.log),
                           );
                         },
                         controller: scrollController,
