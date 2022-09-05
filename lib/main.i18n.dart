@@ -76,7 +76,7 @@ extension Localization on String {
       //"zh": "重启",
     },
     newModelDetails: {
-      "en_us": "DV350, EV500",
+      "en_us": "DV350, EV500, DV350",
       //"zh": "重启",
     },
     unknownModelDetails: {

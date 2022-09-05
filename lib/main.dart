@@ -219,8 +219,9 @@ class MyHomePage extends HookConsumerWidget {
                             pwd,
                             echoEnabled: false,
                             onLog: (log) {
-                              final maskedLog = log.log
-                                  .replaceAll(RegExp(r'antslq'), '******');
+                              final maskedLog = log.log.replaceAll(
+                                  RegExp('(antslq|haantslq|$pwd)'),
+                                  ''.padRight(pwd.length, '*'));
                               logs.value = [
                                 ...logs.value,
                                 LogItem(log.id, maskedLog)
