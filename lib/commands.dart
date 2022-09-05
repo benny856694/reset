@@ -9,6 +9,6 @@ String resetCfgCmd(bool backup) {
   return cmd;
 }
 
-String rebootCmd() {
-  return 'reboot';
-}
+const rebootCmd = 'reboot';
+
+const resetDingDingCmd = 'rm -rf /data_fs/sdk_*';

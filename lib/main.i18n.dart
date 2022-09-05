@@ -16,6 +16,7 @@ const logout = "logout";
 const resetCfg = "resetCfg";
 const log = "log";
 const reboot = 'reboot';
+const resetDingDing = 'resetCfgOfDingDing';
 
 extension Localization on String {
   static const _t = Translations.from("en_us", {
@@ -82,6 +83,10 @@ extension Localization on String {
     unknownModelDetails: {
       "en_us": "Please input password",
       "zh": "请输入密码",
+    },
+    resetDingDing: {
+      "en_us": "Reset DD",
+      "zh": "重置钉钉",
     }
   });
 

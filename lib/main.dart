@@ -38,7 +38,7 @@ void main() async {
     await windowManager.ensureInitialized();
 
     WindowOptions windowOptions = const WindowOptions(
-      size: Size(400, 700),
+      size: Size(500, 700),
       center: true,
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -271,7 +271,21 @@ class MyHomePage extends HookConsumerWidget {
                     child: ElevatedButton.icon(
                       onPressed: isLoggedIn
                           ? () {
-                              telnet.value?.writeline(rebootCmd());
+                              telnet.value?.writeline(resetDingDingCmd);
+                            }
+                          : null,
+                      icon: const Icon(Icons.restore),
+                      label: Text(t.resetDingDing.i18n),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: isLoggedIn
+                          ? () {
+                              telnet.value?.writeline(rebootCmd);
                             }
                           : null,
                       icon: const Icon(Icons.play_arrow),
