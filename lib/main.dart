@@ -182,7 +182,7 @@ class MyHomePage extends HookConsumerWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text('${t.deviceType.i18n} ($deviceTypeDetails)'),
+                        Text('${t.deviceType.i18n} $deviceTypeDetails'),
                         const SizedBox(
                           height: 8.0,
                         ),
