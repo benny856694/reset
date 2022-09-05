@@ -251,47 +251,38 @@ class MyHomePage extends HookConsumerWidget {
               const SizedBox(
                 height: 8.0,
               ),
-              Row(
+              Wrap(
+                spacing: 4.0,
+                runSpacing: 4.0,
+                alignment: WrapAlignment.center,
                 children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: isLoggedIn
-                          ? () {
-                              telnet.value?.writeline(resetCfgCmd(true));
-                            }
-                          : null,
-                      icon: const Icon(Icons.restore),
-                      label: Text(t.resetCfg.i18n),
-                    ),
+                  ElevatedButton.icon(
+                    onPressed: isLoggedIn
+                        ? () {
+                            telnet.value?.writeline(resetCfgCmd(true));
+                          }
+                        : null,
+                    icon: const Icon(Icons.restore),
+                    label: Text(t.resetCfg.i18n),
                   ),
-                  const SizedBox(
-                    width: 8.0,
+                  ElevatedButton.icon(
+                    onPressed: isLoggedIn
+                        ? () {
+                            telnet.value?.writeline(resetDingDingCmd);
+                          }
+                        : null,
+                    icon: const Icon(Icons.restore),
+                    label: Text(t.resetDingDing.i18n),
                   ),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: isLoggedIn
-                          ? () {
-                              telnet.value?.writeline(resetDingDingCmd);
-                            }
-                          : null,
-                      icon: const Icon(Icons.restore),
-                      label: Text(t.resetDingDing.i18n),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8.0,
-                  ),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: isLoggedIn
-                          ? () {
-                              telnet.value?.writeline(rebootCmd);
-                            }
-                          : null,
-                      icon: const Icon(Icons.play_arrow),
-                      label: Text(
-                        t.reboot.i18n,
-                      ),
+                  ElevatedButton.icon(
+                    onPressed: isLoggedIn
+                        ? () {
+                            telnet.value?.writeline(rebootCmd);
+                          }
+                        : null,
+                    icon: const Icon(Icons.play_arrow),
+                    label: Text(
+                      t.reboot.i18n,
                     ),
                   ),
                 ],
