@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reset/commands.dart';
 import 'package:reset/telnet.dart';
 import 'package:i18n_extension/i18n_widget.dart';
+import 'package:window_manager/window_manager.dart';
+import 'dart:io';
 import 'main.i18n.dart' as t;
 
 enum DeviceType { oldModel, newModel, unknownModel }
@@ -30,6 +32,21 @@ final deviceTypeDescProvider = Provider((ref) {
 final isLoggedinProvider = StateProvider((_) => false);
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    await windowManager.ensureInitialized();
+
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(400, 700),
+      center: true,
+    );
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
