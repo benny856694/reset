@@ -243,7 +243,7 @@ class MyHomePage extends HookConsumerWidget {
                           strokeWidth: 2.0,
                         ),
                       )
-                    : const Icon(Icons.login),
+                    : Icon(isLoggedIn ? Icons.logout : Icons.login),
                 label: !isLoggedIn
                     ? Text(isLogging.value ? t.loggingin.i18n : t.login.i18n)
                     : Text(t.logout.i18n),
