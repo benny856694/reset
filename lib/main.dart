@@ -15,19 +15,12 @@ final counterProvider = StateProvider((ref) => 0);
 final deviceTypeProvider = StateProvider((_) => DeviceType.oldModel);
 final deviceTypeDescProvider = Provider((ref) {
   final dt = ref.watch(deviceTypeProvider);
-  var result = '';
-  switch (dt) {
-    case DeviceType.newModel:
-      result = t.newModelDetails.i18n;
-      break;
-    case DeviceType.oldModel:
-      result = t.oldModelDetails.i18n;
-      break;
-    case DeviceType.unknownModel:
-      result = t.unknownModelDetails.i18n;
-      break;
-  }
-  return result;
+  final m = {
+    DeviceType.newModel: t.newModelDetails.i18n,
+    DeviceType.oldModel: t.oldModelDetails.i18n,
+    DeviceType.unknownModel: t.unknownModelDetails.i18n
+  };
+  return m[dt] ?? '';
 });
 final isLoggedinProvider = StateProvider((_) => false);
 
