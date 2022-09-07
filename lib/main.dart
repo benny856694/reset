@@ -11,8 +11,25 @@ import 'main.i18n.dart' as t;
 
 enum DeviceType { oldModel, newModel, unknownModel }
 
-final counterProvider = StateProvider((ref) => 0);
+enum LoginState { idle, logging, loggedIn }
+
+const rootUserName = 'root';
+final ipAddressExp = RegExp(
+    r'\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b');
+
 final deviceTypeProvider = StateProvider((_) => DeviceType.oldModel);
+final _currentCustomPasswordProvider = StateProvider((_) => '');
+final _passwordProvider = Provider<String>((ref) {
+  final dt = ref.watch(deviceTypeProvider);
+  final currentCustomPassword = ref.watch(_currentCustomPasswordProvider);
+  final m = {
+    DeviceType.oldModel: 'antslq',
+    DeviceType.newModel: 'haantslq',
+    DeviceType.unknownModel: currentCustomPassword,
+  };
+  return m[dt]!;
+});
+
 final deviceTypeDescProvider = Provider((ref) {
   final dt = ref.watch(deviceTypeProvider);
   final m = {
@@ -20,9 +37,34 @@ final deviceTypeDescProvider = Provider((ref) {
     DeviceType.oldModel: t.oldModelDetails.i18n,
     DeviceType.unknownModel: t.unknownModelDetails.i18n
   };
+
   return m[dt] ?? '';
 });
-final isLoggedinProvider = StateProvider((_) => false);
+
+final loginStateProvider = StateProvider((_) => LoginState.idle);
+
+final loginEnabledProvider = Provider((ref) {
+  final loginState = ref.watch(loginStateProvider);
+  final ipAddress = ref.watch(_ipAddressProvider);
+  final pwd = ref.watch(_passwordProvider);
+
+  var result = false;
+  switch (loginState) {
+    case LoginState.idle:
+      result = ipAddressExp.hasMatch(ipAddress) && pwd.isNotEmpty;
+      break;
+    case LoginState.logging:
+      result = false;
+      break;
+    case LoginState.loggedIn:
+      result = true;
+      break;
+  }
+
+  return result;
+});
+
+final _ipAddressProvider = StateProvider((_) => '');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,41 +107,26 @@ class MyApp extends StatelessWidget {
       ],
       home: I18n(
         //initialLocale: const Locale('zh'),
-        child: MyHomePage(),
+        child: const MyHomePage(),
       ),
     );
   }
 }
 
 class MyHomePage extends HookConsumerWidget {
-  MyHomePage({super.key});
+  const MyHomePage({super.key});
 
   //final String title = t.appTitle.i18n;
-
-  final ipAddressExp = RegExp(
-      r'\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final deviceType = ref.watch(deviceTypeProvider);
-    final isLoggedIn = ref.watch(isLoggedinProvider);
-    final isLogging = useState(false);
+    final loginState = ref.watch(loginStateProvider);
     final telnet = useState<Telnet?>(null);
     final logs = useState(<LogItem>[]);
-    final customPassword = useState('');
-    final ipAddress = useState('');
     final scrollController = useScrollController();
     final deviceTypeDetails = ref.watch(deviceTypeDescProvider);
-
-    bool enableLogin() {
-      var enabled = !isLogging.value;
-      enabled = enabled && ipAddressExp.hasMatch(ipAddress.value);
-      var dt = ref.read(deviceTypeProvider.notifier);
-      if (dt.state == DeviceType.unknownModel) {
-        enabled = enabled && customPassword.value.isNotEmpty;
-      }
-      return enabled;
-    }
+    final loginEnabled = ref.watch(loginEnabledProvider);
 
     ref.listen(
       deviceTypeProvider,
@@ -125,7 +152,7 @@ class MyHomePage extends HookConsumerWidget {
                   label: Text(t.ipAddress.i18n),
                 ),
                 onChanged: (value) {
-                  ipAddress.value = value;
+                  ref.read(_ipAddressProvider.notifier).state = value;
                 },
               ),
               Row(
@@ -136,7 +163,9 @@ class MyHomePage extends HookConsumerWidget {
                         label: Text(t.password.i18n),
                       ),
                       onChanged: (value) {
-                        customPassword.value = value;
+                        ref
+                            .read(_currentCustomPasswordProvider.notifier)
+                            .state = value;
                       },
                       enabled: deviceType == DeviceType.unknownModel,
                       obscureText: true,
@@ -189,27 +218,21 @@ class MyHomePage extends HookConsumerWidget {
                 ),
               ),
               ElevatedButton.icon(
-                onPressed: enableLogin()
+                onPressed: loginEnabled
                     ? () async {
                         telnet.value?.terminate();
-                        if (isLoggedIn) {
-                          ref.read(isLoggedinProvider.notifier).state = false;
+                        final state = ref.read(loginStateProvider.notifier);
+                        if (state.state == LoginState.loggedIn) {
+                          state.state = LoginState.idle;
                         } else {
                           logs.value = [];
-                          isLogging.value = true;
-                          var pwd = customPassword.value;
-                          var dt = ref.read(deviceTypeProvider.notifier);
-                          if (dt.state != DeviceType.unknownModel) {
-                            pwd = dt.state == DeviceType.oldModel
-                                ? 'antslq'
-                                : 'haantslq';
-                          }
-
+                          state.state = LoginState.logging;
+                          final pwd = ref.read(_passwordProvider);
                           telnet.value = Telnet(
-                            ipAddress.value,
+                            ref.read(_ipAddressProvider.notifier).state,
                             23,
-                            'root',
-                            pwd,
+                            rootUserName,
+                            ref.read(_passwordProvider),
                             echoEnabled: false,
                             onLog: (log) {
                               final maskedLog =
@@ -220,26 +243,33 @@ class MyHomePage extends HookConsumerWidget {
                               ];
                             },
                             onLogin: (success) {
-                              ref.read(isLoggedinProvider.notifier).state =
-                                  success;
-                              isLogging.value = false;
+                              ref.read(loginStateProvider.notifier).state =
+                                  success
+                                      ? LoginState.loggedIn
+                                      : LoginState.idle;
                             },
                           );
                           await telnet.value?.startConnect();
                         }
                       }
                     : null,
-                icon: isLogging.value
+                icon: loginState == LoginState.logging
                     ? const SizedBox.square(
                         dimension: 16.0,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.0,
                         ),
                       )
-                    : Icon(isLoggedIn ? Icons.logout : Icons.login),
-                label: !isLoggedIn
-                    ? Text(isLogging.value ? t.loggingin.i18n : t.login.i18n)
-                    : Text(t.logout.i18n),
+                    : Icon(loginState == LoginState.loggedIn
+                        ? Icons.logout
+                        : Icons.login),
+                label: Text(
+                  loginState == LoginState.idle
+                      ? t.login.i18n
+                      : (loginState == LoginState.logging
+                          ? t.loggingin.i18n
+                          : t.logout.i18n),
+                ),
               ),
               const SizedBox(
                 height: 8.0,
@@ -250,7 +280,7 @@ class MyHomePage extends HookConsumerWidget {
                 alignment: WrapAlignment.center,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: isLoggedIn
+                    onPressed: loginState == LoginState.loggedIn
                         ? () {
                             telnet.value?.writeline(resetCfgCmd(true));
                           }
@@ -259,7 +289,7 @@ class MyHomePage extends HookConsumerWidget {
                     label: Text(t.resetCfg.i18n),
                   ),
                   ElevatedButton.icon(
-                    onPressed: isLoggedIn
+                    onPressed: loginState == LoginState.loggedIn
                         ? () {
                             telnet.value?.writeline(resetDingDingCmd);
                           }
@@ -268,7 +298,7 @@ class MyHomePage extends HookConsumerWidget {
                     label: Text(t.resetDingDing.i18n),
                   ),
                   ElevatedButton.icon(
-                    onPressed: isLoggedIn
+                    onPressed: loginState == LoginState.loggedIn
                         ? () {
                             telnet.value?.writeline(rebootCmd);
                           }
