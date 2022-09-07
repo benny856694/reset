@@ -232,7 +232,7 @@ class MyHomePage extends HookConsumerWidget {
                             ref.read(_ipAddressProvider.notifier).state,
                             23,
                             rootUserName,
-                            ref.read(_passwordProvider),
+                            pwd,
                             echoEnabled: false,
                             onLog: (log) {
                               final maskedLog =
