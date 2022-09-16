@@ -276,9 +276,20 @@ class MyHomePage extends HookConsumerWidget {
               ),
               Wrap(
                 spacing: 4.0,
-                runSpacing: 4.0,
+                runSpacing: 8.0,
                 alignment: WrapAlignment.center,
                 children: [
+                  ElevatedButton.icon(
+                    onPressed: loginState == LoginState.loggedIn
+                        ? () async {
+                            telnet.value?.writeline(resetCfgCmd(true));
+                            await Future.delayed(const Duration(seconds: 3));
+                            telnet.value?.writeline(rebootCmd);
+                          }
+                        : null,
+                    icon: const Icon(Icons.restore),
+                    label: Text(t.resetAndReboot.i18n),
+                  ),
                   ElevatedButton.icon(
                     onPressed: loginState == LoginState.loggedIn
                         ? () {

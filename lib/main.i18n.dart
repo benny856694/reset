@@ -16,6 +16,7 @@ const logout = "logout";
 const resetCfg = "resetCfg";
 const log = "log";
 const reboot = 'reboot';
+const resetAndReboot = "rest&reboot";
 const resetDingDing = 'resetCfgOfDingDing';
 
 extension Localization on String {
@@ -62,7 +63,11 @@ extension Localization on String {
     },
     resetCfg: {
       "en_us": "Reset Cfg",
-      "zh": "重置设置",
+      "zh": "重置",
+    },
+    resetAndReboot: {
+      "en_us": "Reset & Reboot",
+      "zh": "重置并重启",
     },
     log: {
       "en_us": "Logs",
