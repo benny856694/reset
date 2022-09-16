@@ -289,7 +289,7 @@ class MyHomePage extends HookConsumerWidget {
                             );
                             if (res == OkCancelResult.ok) {
                               telnet.value?.writeline(resetCfgCmd(true));
-                              await Future.delayed(const Duration(seconds: 3));
+                              await Future.delayed(const Duration(seconds: 2));
                               telnet.value?.writeline(rebootCmd);
                             }
                           }
@@ -329,8 +329,14 @@ class MyHomePage extends HookConsumerWidget {
                   ),
                   ElevatedButton.icon(
                     onPressed: loginState == LoginState.loggedIn
-                        ? () {
-                            telnet.value?.writeline(rebootCmd);
+                        ? () async {
+                            var res = await showOkCancelAlertDialog(
+                              context: context,
+                              title: t.areYouSure.i18n,
+                            );
+                            if (res == OkCancelResult.ok) {
+                              telnet.value?.writeline(rebootCmd);
+                            }
                           }
                         : null,
                     icon: const Icon(Icons.play_arrow),
