@@ -43,6 +43,7 @@ dependencies:
   i18n_extension: ^5.0.1
   window_manager: ^0.2.7
   adaptive_dialog: ^1.8.0+1
+  flutter_animate: ^1.0.0
 
 dev_dependencies:
   flutter_test:

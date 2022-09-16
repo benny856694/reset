@@ -1,5 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -158,20 +159,27 @@ class MyHomePage extends HookConsumerWidget {
               ),
               Row(
                 children: [
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        label: Text(t.password.i18n),
+                  if (deviceType == DeviceType.unknownModel)
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          label: Text(t.password.i18n),
+                        ),
+                        onChanged: (value) {
+                          ref
+                              .read(_currentCustomPasswordProvider.notifier)
+                              .state = value;
+                        },
+                        enabled: deviceType == DeviceType.unknownModel,
+                        obscureText: true,
                       ),
-                      onChanged: (value) {
-                        ref
-                            .read(_currentCustomPasswordProvider.notifier)
-                            .state = value;
-                      },
-                      enabled: deviceType == DeviceType.unknownModel,
-                      obscureText: true,
-                    ),
-                  )
+                    )
+                        .animate()
+                        .effect(duration: 1000.ms)
+                        .addEffect(const FadeEffect(
+                          begin: 0,
+                          end: 1,
+                        ))
                 ],
               ),
               Padding(
