@@ -157,31 +157,25 @@ class MyHomePage extends HookConsumerWidget {
                   ref.read(_ipAddressProvider.notifier).state = value;
                 },
               ),
-              Row(
-                children: [
-                  if (deviceType == DeviceType.unknownModel)
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          label: Text(t.password.i18n),
-                        ),
-                        onChanged: (value) {
-                          ref
-                              .read(_currentCustomPasswordProvider.notifier)
-                              .state = value;
-                        },
-                        enabled: deviceType == DeviceType.unknownModel,
-                        obscureText: true,
-                      ),
-                    )
-                        .animate()
-                        .effect(duration: 1000.ms)
-                        .addEffect(const FadeEffect(
-                          begin: 0,
-                          end: 1,
-                        ))
-                ],
-              ),
+              if (deviceType == DeviceType.unknownModel)
+                TextField(
+                  decoration: InputDecoration(
+                    label: Text(t.password.i18n),
+                  ),
+                  onChanged: (value) {
+                    ref.read(_currentCustomPasswordProvider.notifier).state =
+                        value;
+                  },
+                  enabled: deviceType == DeviceType.unknownModel,
+                  obscureText: true,
+                )
+                    .animate()
+                    .effect(duration: 500.ms)
+                    .addEffect(const FadeEffect(begin: 0, end: 1))
+                    .addEffect(const SlideEffect(
+                      begin: Offset(0, -1),
+                      curve: Curves.bounceOut,
+                    )),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: LayoutBuilder(
