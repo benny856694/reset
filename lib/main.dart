@@ -1,3 +1,4 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -282,9 +283,15 @@ class MyHomePage extends HookConsumerWidget {
                   ElevatedButton.icon(
                     onPressed: loginState == LoginState.loggedIn
                         ? () async {
-                            telnet.value?.writeline(resetCfgCmd(true));
-                            await Future.delayed(const Duration(seconds: 3));
-                            telnet.value?.writeline(rebootCmd);
+                            var res = await showOkCancelAlertDialog(
+                              context: context,
+                              title: t.areYouSure.i18n,
+                            );
+                            if (res == OkCancelResult.ok) {
+                              telnet.value?.writeline(resetCfgCmd(true));
+                              await Future.delayed(const Duration(seconds: 3));
+                              telnet.value?.writeline(rebootCmd);
+                            }
                           }
                         : null,
                     icon: const Icon(Icons.restore),
@@ -292,8 +299,14 @@ class MyHomePage extends HookConsumerWidget {
                   ),
                   ElevatedButton.icon(
                     onPressed: loginState == LoginState.loggedIn
-                        ? () {
-                            telnet.value?.writeline(resetCfgCmd(true));
+                        ? () async {
+                            var res = await showOkCancelAlertDialog(
+                              context: context,
+                              title: t.areYouSure.i18n,
+                            );
+                            if (res == OkCancelResult.ok) {
+                              telnet.value?.writeline(resetCfgCmd(true));
+                            }
                           }
                         : null,
                     icon: const Icon(Icons.restore),
@@ -301,8 +314,14 @@ class MyHomePage extends HookConsumerWidget {
                   ),
                   ElevatedButton.icon(
                     onPressed: loginState == LoginState.loggedIn
-                        ? () {
-                            telnet.value?.writeline(resetDingDingCmd);
+                        ? () async {
+                            var res = await showOkCancelAlertDialog(
+                              context: context,
+                              title: t.areYouSure.i18n,
+                            );
+                            if (res == OkCancelResult.ok) {
+                              telnet.value?.writeline(resetDingDingCmd);
+                            }
                           }
                         : null,
                     icon: const Icon(Icons.restore),

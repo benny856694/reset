@@ -18,6 +18,7 @@ const log = "log";
 const reboot = 'reboot';
 const resetAndReboot = "rest&reboot";
 const resetDingDing = 'resetCfgOfDingDing';
+const areYouSure = 'areYouSure';
 
 extension Localization on String {
   static const _t = Translations.from("en_us", {
@@ -92,6 +93,10 @@ extension Localization on String {
     resetDingDing: {
       "en_us": "Reset DD",
       "zh": "重置钉钉",
+    },
+    areYouSure: {
+      "en_us": "Send selected command?",
+      "zh": "下发选定的命令？",
     }
   });
 
