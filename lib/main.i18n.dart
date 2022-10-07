@@ -55,7 +55,7 @@ extension Localization on String {
       "zh": "登录",
     },
     loggingin: {
-      "en_us": "Logging...",
+      "en_us": "Login...",
       "zh": "登录中...",
     },
     logout: {
