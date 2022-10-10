@@ -143,7 +143,13 @@ class MyHomePage extends HookConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.info),
-            onPressed: () {},
+            onPressed: () {
+              showAboutDialog(
+                context: context,
+                applicationName: t.appTitle.i18n,
+                children: const [Text('增加重置双发平台')],
+              );
+            },
           )
         ],
       ),
