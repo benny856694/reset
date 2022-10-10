@@ -94,6 +94,13 @@ class Telnet {
     }
   }
 
+  Future<void> writeMultipleLines(List<String> commands) async {
+    for (var cmd in commands) {
+      writeline(cmd);
+      await Future.delayed(const Duration(seconds: 1));
+    }
+  }
+
   void terminate() async {
     await _client?.terminate();
   }

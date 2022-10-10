@@ -296,9 +296,16 @@ class MyHomePage extends HookConsumerWidget {
                               title: t.areYouSure.i18n,
                             );
                             if (res == OkCancelResult.ok) {
-                              telnet.value?.writeline(resetCfgCmd(true));
-                              await Future.delayed(const Duration(seconds: 2));
-                              telnet.value?.writeline(rebootCmd);
+                              var cmds = [
+                                resetCfgCmd(true),
+                                if (ref
+                                        .read(deviceTypeProvider.notifier)
+                                        .state ==
+                                    DeviceType.newModel)
+                                  resetMultipleSend,
+                                rebootCmd,
+                              ];
+                              await telnet.value?.writeMultipleLines(cmds);
                             }
                           }
                         : null,
@@ -313,11 +320,15 @@ class MyHomePage extends HookConsumerWidget {
                               title: t.areYouSure.i18n,
                             );
                             if (res == OkCancelResult.ok) {
-                              telnet.value?.writeline(resetCfgCmd(true));
-                              if (ref.read(deviceTypeProvider.notifier).state ==
-                                  DeviceType.newModel) {
-                                telnet.value?.writeline(resetMultipleSend);
-                              }
+                              var cmds = [
+                                resetCfgCmd(true),
+                                if (ref
+                                        .read(deviceTypeProvider.notifier)
+                                        .state ==
+                                    DeviceType.newModel)
+                                  resetMultipleSend,
+                              ];
+                              await telnet.value?.writeMultipleLines(cmds);
                             }
                           }
                         : null,
