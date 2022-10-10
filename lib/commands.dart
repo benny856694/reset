@@ -13,4 +13,4 @@ const rebootCmd = 'reboot';
 
 const resetDingDingCmd = 'rm -rf /data_fs/sdk_*';
 
-const resetMultipleSend = 'rm -f /data_fs/config/worksite_manager.json';
+const resetMultipleSendCmd = 'rm -f /data_fs/config/worksite_manager.json';

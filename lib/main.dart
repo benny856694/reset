@@ -120,6 +120,14 @@ class MyHomePage extends HookConsumerWidget {
 
   //final String title = t.appTitle.i18n;
 
+  List<String> buildResetCmds(DeviceType currentModel) {
+    var cmds = [
+      resetCfgCmd(true),
+      if (currentModel == DeviceType.newModel) resetMultipleSendCmd,
+    ];
+    return cmds;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final deviceType = ref.watch(deviceTypeProvider);
@@ -303,12 +311,9 @@ class MyHomePage extends HookConsumerWidget {
                             );
                             if (res == OkCancelResult.ok) {
                               var cmds = [
-                                resetCfgCmd(true),
-                                if (ref
-                                        .read(deviceTypeProvider.notifier)
-                                        .state ==
-                                    DeviceType.newModel)
-                                  resetMultipleSend,
+                                ...buildResetCmds(ref
+                                    .read(deviceTypeProvider.notifier)
+                                    .state),
                                 rebootCmd,
                               ];
                               await telnet.value?.writeMultipleLines(cmds);
@@ -326,14 +331,8 @@ class MyHomePage extends HookConsumerWidget {
                               title: t.areYouSure.i18n,
                             );
                             if (res == OkCancelResult.ok) {
-                              var cmds = [
-                                resetCfgCmd(true),
-                                if (ref
-                                        .read(deviceTypeProvider.notifier)
-                                        .state ==
-                                    DeviceType.newModel)
-                                  resetMultipleSend,
-                              ];
+                              var cmds = buildResetCmds(
+                                  ref.read(deviceTypeProvider.notifier).state);
                               await telnet.value?.writeMultipleLines(cmds);
                             }
                           }
