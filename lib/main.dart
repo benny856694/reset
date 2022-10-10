@@ -140,6 +140,12 @@ class MyHomePage extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.appTitle.i18n),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info),
+            onPressed: () {},
+          )
+        ],
       ),
       body: Center(
         child: Padding(
@@ -308,6 +314,10 @@ class MyHomePage extends HookConsumerWidget {
                             );
                             if (res == OkCancelResult.ok) {
                               telnet.value?.writeline(resetCfgCmd(true));
+                              if (ref.read(deviceTypeProvider.notifier).state ==
+                                  DeviceType.newModel) {
+                                telnet.value?.writeline(resetMultipleSend);
+                              }
                             }
                           }
                         : null,

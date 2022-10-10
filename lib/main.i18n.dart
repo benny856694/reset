@@ -23,8 +23,8 @@ const areYouSure = 'areYouSure';
 extension Localization on String {
   static const _t = Translations.from("en_us", {
     appTitle: {
-      "en_us": "Reset Tool",
-      "zh": "设备重置工具",
+      "en_us": "Reset Tool v1.0",
+      "zh": "设备重置工具 v1.0",
     },
     ipAddress: {
       "en_us": "IP Address",
