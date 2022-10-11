@@ -240,7 +240,7 @@ class MyHomePage extends HookConsumerWidget {
                   },
                 ),
               ),
-              ElevatedButton.icon(
+              OutlinedButton.icon(
                 onPressed: loginEnabled
                     ? () async {
                         telnet.value?.terminate();
@@ -303,7 +303,7 @@ class MyHomePage extends HookConsumerWidget {
                   runSpacing: 8.0,
                   alignment: WrapAlignment.center,
                   children: [
-                    ElevatedButton.icon(
+                    OutlinedButton.icon(
                       onPressed: loginState == LoginState.loggedIn
                           ? () async {
                               var res = await showOkCancelAlertDialog(
@@ -324,7 +324,7 @@ class MyHomePage extends HookConsumerWidget {
                       icon: const Icon(Icons.restore),
                       label: Text(t.resetAndReboot.i18n),
                     ),
-                    ElevatedButton.icon(
+                    OutlinedButton.icon(
                       onPressed: loginState == LoginState.loggedIn
                           ? () async {
                               var res = await showOkCancelAlertDialog(
@@ -342,7 +342,7 @@ class MyHomePage extends HookConsumerWidget {
                       icon: const Icon(Icons.restore),
                       label: Text(t.resetCfg.i18n),
                     ),
-                    ElevatedButton.icon(
+                    OutlinedButton.icon(
                       onPressed: loginState == LoginState.loggedIn
                           ? () async {
                               var res = await showOkCancelAlertDialog(
@@ -357,7 +357,7 @@ class MyHomePage extends HookConsumerWidget {
                       icon: const Icon(Icons.restore),
                       label: Text(t.resetDingDing.i18n),
                     ),
-                    ElevatedButton.icon(
+                    OutlinedButton.icon(
                       onPressed: loginState == LoginState.loggedIn
                           ? () async {
                               var res = await showOkCancelAlertDialog(
