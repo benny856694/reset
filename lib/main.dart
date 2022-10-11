@@ -297,83 +297,88 @@ class MyHomePage extends HookConsumerWidget {
               const SizedBox(
                 height: 8.0,
               ),
-              Wrap(
-                spacing: 4.0,
-                runSpacing: 8.0,
-                alignment: WrapAlignment.center,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: loginState == LoginState.loggedIn
-                        ? () async {
-                            var res = await showOkCancelAlertDialog(
-                              context: context,
-                              title: t.areYouSure.i18n,
-                            );
-                            if (res == OkCancelResult.ok) {
-                              var cmds = [
-                                ...buildResetCmds(ref
-                                    .read(deviceTypeProvider.notifier)
-                                    .state),
-                                rebootCmd,
-                              ];
-                              await telnet.value?.writeMultipleLines(cmds);
+              if (loginState == LoginState.loggedIn)
+                Wrap(
+                  spacing: 4.0,
+                  runSpacing: 8.0,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: loginState == LoginState.loggedIn
+                          ? () async {
+                              var res = await showOkCancelAlertDialog(
+                                context: context,
+                                title: t.areYouSure.i18n,
+                              );
+                              if (res == OkCancelResult.ok) {
+                                var cmds = [
+                                  ...buildResetCmds(ref
+                                      .read(deviceTypeProvider.notifier)
+                                      .state),
+                                  rebootCmd,
+                                ];
+                                await telnet.value?.writeMultipleLines(cmds);
+                              }
                             }
-                          }
-                        : null,
-                    icon: const Icon(Icons.restore),
-                    label: Text(t.resetAndReboot.i18n),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: loginState == LoginState.loggedIn
-                        ? () async {
-                            var res = await showOkCancelAlertDialog(
-                              context: context,
-                              title: t.areYouSure.i18n,
-                            );
-                            if (res == OkCancelResult.ok) {
-                              var cmds = buildResetCmds(
-                                  ref.read(deviceTypeProvider.notifier).state);
-                              await telnet.value?.writeMultipleLines(cmds);
-                            }
-                          }
-                        : null,
-                    icon: const Icon(Icons.restore),
-                    label: Text(t.resetCfg.i18n),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: loginState == LoginState.loggedIn
-                        ? () async {
-                            var res = await showOkCancelAlertDialog(
-                              context: context,
-                              title: t.areYouSure.i18n,
-                            );
-                            if (res == OkCancelResult.ok) {
-                              telnet.value?.writeline(resetDingDingCmd);
-                            }
-                          }
-                        : null,
-                    icon: const Icon(Icons.restore),
-                    label: Text(t.resetDingDing.i18n),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: loginState == LoginState.loggedIn
-                        ? () async {
-                            var res = await showOkCancelAlertDialog(
-                              context: context,
-                              title: t.areYouSure.i18n,
-                            );
-                            if (res == OkCancelResult.ok) {
-                              telnet.value?.writeline(rebootCmd);
-                            }
-                          }
-                        : null,
-                    icon: const Icon(Icons.play_arrow),
-                    label: Text(
-                      t.reboot.i18n,
+                          : null,
+                      icon: const Icon(Icons.restore),
+                      label: Text(t.resetAndReboot.i18n),
                     ),
-                  ),
-                ],
-              ),
+                    ElevatedButton.icon(
+                      onPressed: loginState == LoginState.loggedIn
+                          ? () async {
+                              var res = await showOkCancelAlertDialog(
+                                context: context,
+                                title: t.areYouSure.i18n,
+                              );
+                              if (res == OkCancelResult.ok) {
+                                var cmds = buildResetCmds(ref
+                                    .read(deviceTypeProvider.notifier)
+                                    .state);
+                                await telnet.value?.writeMultipleLines(cmds);
+                              }
+                            }
+                          : null,
+                      icon: const Icon(Icons.restore),
+                      label: Text(t.resetCfg.i18n),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: loginState == LoginState.loggedIn
+                          ? () async {
+                              var res = await showOkCancelAlertDialog(
+                                context: context,
+                                title: t.areYouSure.i18n,
+                              );
+                              if (res == OkCancelResult.ok) {
+                                telnet.value?.writeline(resetDingDingCmd);
+                              }
+                            }
+                          : null,
+                      icon: const Icon(Icons.restore),
+                      label: Text(t.resetDingDing.i18n),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: loginState == LoginState.loggedIn
+                          ? () async {
+                              var res = await showOkCancelAlertDialog(
+                                context: context,
+                                title: t.areYouSure.i18n,
+                              );
+                              if (res == OkCancelResult.ok) {
+                                telnet.value?.writeline(rebootCmd);
+                              }
+                            }
+                          : null,
+                      icon: const Icon(Icons.play_arrow),
+                      label: Text(
+                        t.reboot.i18n,
+                      ),
+                    ),
+                  ],
+                )
+                    .animate()
+                    .effect(duration: 500.ms)
+                    .addEffect(const FadeEffect(begin: 0, end: 1)),
               const SizedBox(
                 height: 8.0,
               ),
