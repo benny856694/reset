@@ -124,6 +124,7 @@ class MyHomePage extends HookConsumerWidget {
     var cmds = [
       resetCfgCmd(true),
       if (currentModel == DeviceType.newModel) resetMultipleSendCmd,
+      if (currentModel == DeviceType.oldModel) clearADFilesCmd,
     ];
     return cmds;
   }
@@ -155,7 +156,10 @@ class MyHomePage extends HookConsumerWidget {
               showAboutDialog(
                 context: context,
                 applicationName: t.appTitle.i18n,
-                children: const [Text('增加重置双发平台')],
+                children: const [
+                  Text('增加重置双发平台'),
+                  Text('增加清除广告文件'),
+                ],
               );
             },
           )

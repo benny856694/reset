@@ -14,3 +14,6 @@ const rebootCmd = 'reboot';
 const resetDingDingCmd = 'rm -rf /data_fs/sdk_*';
 
 const resetMultipleSendCmd = 'rm -f /data_fs/config/worksite_manager.json';
+
+//删除广告文件
+const clearADFilesCmd = 'rm -f /data_fs/screensaver/*';
