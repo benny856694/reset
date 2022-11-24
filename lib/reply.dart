@@ -1,37 +1,29 @@
-// To parse this JSON data, do
-//
-//     final welcome = welcomeFromJson(jsonString);
-
-import 'dart:convert';
-
+/* 
+// Example Usage
+Map<String, dynamic> map = jsonDecode(<myJSONString>);
+var myRootNode = Root.fromJson(map);
+*/
 class Reply {
-  Reply({
-    this.cmd = '',
-    this.code = 0,
-    this.deviceSn = '',
-    this.reply = '',
-  });
+  String? cmd;
+  int? code;
+  String? devicesn;
+  String? reply;
 
-  final String cmd;
-  final int code;
-  final String deviceSn;
-  final String reply;
+  Reply({this.cmd, this.code, this.devicesn, this.reply});
 
-  factory Reply.fromRawJson(String str) => Reply.fromJson(json.decode(str));
+  Reply.fromJson(Map<String, dynamic> json) {
+    cmd = json['cmd'];
+    code = json['code'];
+    devicesn = json['device_sn'];
+    reply = json['reply'];
+  }
 
-  String toRawJson() => json.encode(toJson());
-
-  factory Reply.fromJson(Map<String, dynamic> json) => Reply(
-        cmd: json["cmd"],
-        code: json["code"],
-        deviceSn: json["device_sn"],
-        reply: json["reply"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "cmd": cmd,
-        "code": code,
-        "device_sn": deviceSn,
-        "reply": reply,
-      };
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['cmd'] = cmd;
+    data['code'] = code;
+    data['device_sn'] = devicesn;
+    data['reply'] = reply;
+    return data;
+  }
 }

@@ -25,7 +25,7 @@ const clearADFilesCmd = 'rm -f /data_fs/screensaver/*';
 Future<bool> resetPassword(String ip) async {
   final dio = Dio();
   try {
-    final resp = await dio.post('http://$ip:8000', data: const AuthCmd());
+    final resp = await dio.post('http://$ip:8000', data: AuthCmd());
     final reply = Reply.fromJson(resp.data);
     return reply.code == 0;
   } catch (e) {
