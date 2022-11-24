@@ -47,13 +47,12 @@ final loginStateProvider = StateProvider((_) => LoginState.idle);
 
 final loginEnabledProvider = Provider((ref) {
   final loginState = ref.watch(loginStateProvider);
-  final ipAddress = ref.watch(_ipAddressProvider);
   final pwd = ref.watch(_passwordProvider);
 
   var result = false;
   switch (loginState) {
     case LoginState.idle:
-      result = ipAddressExp.hasMatch(ipAddress) && pwd.isNotEmpty;
+      result = ref.watch(ipAddressValidProvider) && pwd.isNotEmpty;
       break;
     case LoginState.logging:
       result = false;
@@ -67,6 +66,11 @@ final loginEnabledProvider = Provider((ref) {
 });
 
 final _ipAddressProvider = StateProvider((_) => '');
+
+final ipAddressValidProvider = Provider((ref) {
+  final ipaddr = ref.watch(_ipAddressProvider);
+  return ipAddressExp.hasMatch(ipaddr);
+});
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -145,6 +149,16 @@ class MyHomePage extends HookConsumerWidget {
         //isLoginButtonEnabled.value = enableLogin();
       },
     );
+
+    Future<void> confirmCmds(Future<void> Function() onConfirmed) async {
+      var res = await showOkCancelAlertDialog(
+        context: context,
+        title: t.areYouSure.i18n,
+      );
+      if (res == OkCancelResult.ok) {
+        await onConfirmed();
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -244,6 +258,23 @@ class MyHomePage extends HookConsumerWidget {
                   },
                 ),
               ),
+              // OutlinedButton.icon(
+              //   onPressed: ref.watch(ipAddressValidProvider)
+              //       ? () async {
+              //           await confirmCmds(() async {
+              //             final suc = await resetPassword(
+              //                 ref.watch(_ipAddressProvider));
+              //             logs.value.add(LogItem(id++,
+              //                 "${t.resetPassword}: ${suc ? t.success : t.fail}"));
+              //           });
+              //         }
+              //       : null,
+              //   icon: const Icon(Icons.password_outlined),
+              //   label: Text(t.resetPassword.i18n),
+              // ),
+              // const SizedBox(
+              //   height: 8,
+              // ),
               OutlinedButton.icon(
                 onPressed: loginEnabled
                     ? () async {
@@ -364,13 +395,9 @@ class MyHomePage extends HookConsumerWidget {
                     OutlinedButton.icon(
                       onPressed: loginState == LoginState.loggedIn
                           ? () async {
-                              var res = await showOkCancelAlertDialog(
-                                context: context,
-                                title: t.areYouSure.i18n,
-                              );
-                              if (res == OkCancelResult.ok) {
+                              await confirmCmds(() async {
                                 telnet.value?.writeline(rebootCmd);
-                              }
+                              });
                             }
                           : null,
                       icon: const Icon(Icons.play_arrow),

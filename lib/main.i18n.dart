@@ -19,6 +19,9 @@ const reboot = 'reboot';
 const resetAndReboot = "rest&reboot";
 const resetDingDing = 'resetCfgOfDingDing';
 const areYouSure = 'areYouSure';
+const resetPassword = 'resetPassword';
+const success = 'success';
+const fail = 'fail';
 
 extension Localization on String {
   static const _t = Translations.from("en_us", {
@@ -97,7 +100,19 @@ extension Localization on String {
     areYouSure: {
       "en_us": "Send selected command?",
       "zh": "下发选定的命令？",
-    }
+    },
+    resetPassword: {
+      "en_us": "Reset Password",
+      "zh": "重置密码",
+    },
+    success: {
+      "en_us": "Succeed",
+      "zh": "成功",
+    },
+    fail: {
+      "en_us": "Failed",
+      "zh": "失败",
+    },
   });
 
   String get i18n => localize(this, _t);

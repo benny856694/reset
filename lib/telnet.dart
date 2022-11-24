@@ -1,5 +1,7 @@
 import 'package:telnet/telnet.dart';
 
+var id = 0;
+
 class LogItem {
   final int id;
   final String log;
@@ -19,7 +21,6 @@ class Telnet {
   late final ITLConnectionTask _task;
   late final ITelnetClient? _client;
   bool _hasLogin = false;
-  var id = 0;
   final Map<TLOpt, List<TLMsg>> _doReplyMap;
   final Map<TLOpt, List<TLMsg>> _willReplyMap;
 
