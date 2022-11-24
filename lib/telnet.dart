@@ -1,12 +1,16 @@
 import 'package:telnet/telnet.dart';
 
-var id = 0;
-
 class LogItem {
   final int id;
   final String log;
 
+  static int _id = 0;
+  static int get _nextId => _id++;
+
   LogItem(this.id, this.log);
+  factory LogItem.fromString(String log) {
+    return LogItem(_nextId, log);
+  }
 }
 
 class Telnet {
@@ -112,7 +116,7 @@ class Telnet {
       //  onLog?.call(LogItem(id++, "[WRITE] ${event.msg}"));
     } else if (event.type == TLMsgEventType.read) {
       if (event.msg.runtimeType != TLOptMsg) {
-        onLog?.call(LogItem(id++, "[READ] ${event.msg}"));
+        onLog?.call(LogItem.fromString("[READ] ${event.msg}"));
       }
 
       if (event.msg is TLOptMsg) {
@@ -153,7 +157,7 @@ class Telnet {
           onLogin?.call(false);
         } else if (text.contains('#')) {
           _hasLogin = true;
-          onLog?.call(LogItem(id++, "[INFO] Login OK!"));
+          onLog?.call(LogItem.fromString("[INFO] Login OK!"));
           onLogin?.call(true);
         } else if (text.contains("login:") || text.contains("username:")) {
           // Write [username].
@@ -167,13 +171,13 @@ class Telnet {
   }
 
   void _onError(TelnetClient? client, dynamic error) {
-    onLog?.call(LogItem(id++, "[ERROR] $error"));
+    onLog?.call(LogItem.fromString("[ERROR] $error"));
     if (!_hasLogin) {
       onLogin?.call(false);
     }
   }
 
   void _onDone(TelnetClient? client) {
-    onLog?.call(LogItem(id++, "[DONE]"));
+    onLog?.call(LogItem.fromString("[DONE]"));
   }
 }

@@ -268,7 +268,7 @@ class MyHomePage extends HookConsumerWidget {
                                 ref.watch(_ipAddressProvider));
                             logs.value = [
                               ...logs.value,
-                              LogItem(id++,
+                              LogItem.fromString(
                                   "${t.resetPassword.i18n}: ${suc ? t.success : t.fail}")
                             ];
                           });
