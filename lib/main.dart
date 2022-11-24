@@ -1,4 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -258,23 +259,28 @@ class MyHomePage extends HookConsumerWidget {
                   },
                 ),
               ),
-              // OutlinedButton.icon(
-              //   onPressed: ref.watch(ipAddressValidProvider)
-              //       ? () async {
-              //           await confirmCmds(() async {
-              //             final suc = await resetPassword(
-              //                 ref.watch(_ipAddressProvider));
-              //             logs.value.add(LogItem(id++,
-              //                 "${t.resetPassword}: ${suc ? t.success : t.fail}"));
-              //           });
-              //         }
-              //       : null,
-              //   icon: const Icon(Icons.password_outlined),
-              //   label: Text(t.resetPassword.i18n),
-              // ),
-              // const SizedBox(
-              //   height: 8,
-              // ),
+              if (kDebugMode) ...[
+                OutlinedButton.icon(
+                  onPressed: ref.watch(ipAddressValidProvider)
+                      ? () async {
+                          await confirmCmds(() async {
+                            final suc = await resetPassword(
+                                ref.watch(_ipAddressProvider));
+                            logs.value = [
+                              ...logs.value,
+                              LogItem(id++,
+                                  "${t.resetPassword.i18n}: ${suc ? t.success : t.fail}")
+                            ];
+                          });
+                        }
+                      : null,
+                  icon: const Icon(Icons.password_outlined),
+                  label: Text(t.resetPassword.i18n),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+              ],
               OutlinedButton.icon(
                 onPressed: loginEnabled
                     ? () async {
