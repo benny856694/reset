@@ -207,14 +207,7 @@ class MyHomePage extends HookConsumerWidget {
                   },
                   enabled: deviceType == DeviceType.unknownModel,
                   obscureText: true,
-                )
-                    .animate()
-                    .effect(duration: 500.ms)
-                    .addEffect(const FadeEffect(begin: 0, end: 1))
-                    .addEffect(const SlideEffect(
-                      begin: Offset(0, -1),
-                      curve: Curves.bounceOut,
-                    )),
+                ).animate().fadeIn().flipV(),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: LayoutBuilder(
