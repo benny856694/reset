@@ -22,6 +22,7 @@ const areYouSure = 'areYouSure';
 const resetPassword = 'resetPassword';
 const success = 'success';
 const fail = 'fail';
+const startWatchDog = 'startWatchDog';
 
 extension Localization on String {
   static const _t = Translations.from("en_us", {
@@ -112,6 +113,10 @@ extension Localization on String {
     fail: {
       "en_us": "Failed",
       "zh": "失败",
+    },
+    startWatchDog: {
+      "en_us": "Start Watchdog",
+      "zh": "启动看门狗",
     },
   });
 

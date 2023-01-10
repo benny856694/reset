@@ -101,7 +101,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        useMaterial3: true,
+        //useMaterial3: true,
         primarySwatch: Colors.blue,
       ),
       localizationsDelegates: const [
@@ -131,6 +131,15 @@ class MyHomePage extends HookConsumerWidget {
       resetCfgCmd(true),
       if (currentModel == DeviceType.newModel) resetMultipleSendCmd,
       if (currentModel == DeviceType.oldModel) clearADFilesCmd,
+    ];
+    return cmds;
+  }
+
+  List<String> buildStartWatchdogCmds(DeviceType currentModel) {
+    var cmds = [
+      cdHome,
+      if (currentModel == DeviceType.newModel) startWatchDogOther,
+      if (currentModel == DeviceType.oldModel) startWatchDogDV300,
     ];
     return cmds;
   }
@@ -175,6 +184,7 @@ class MyHomePage extends HookConsumerWidget {
                 children: const [
                   Text('增加重置双发平台'),
                   Text('增加清除广告文件'),
+                  Text('增加启动看门狗命令'),
                 ],
               );
             },
@@ -391,6 +401,20 @@ class MyHomePage extends HookConsumerWidget {
                           : null,
                       icon: const Icon(Icons.restore),
                       label: Text(t.resetDingDing.i18n),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: loginState == LoginState.loggedIn
+                          ? () async {
+                              final cmds = buildStartWatchdogCmds(deviceType);
+                              await confirmCmds(() async {
+                                telnet.value?.writeMultipleLines(cmds);
+                              });
+                            }
+                          : null,
+                      icon: const Icon(Icons.remove_red_eye),
+                      label: Text(
+                        t.startWatchDog.i18n,
+                      ),
                     ),
                     OutlinedButton.icon(
                       onPressed: loginState == LoginState.loggedIn

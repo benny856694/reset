@@ -32,3 +32,9 @@ Future<bool> resetPassword(String ip) async {
     return false;
   }
 }
+
+const cdHome = 'cd /home';
+
+const startWatchDogDV300 = './wdgagent';
+
+const startWatchDogOther = './tool/wdgagent';
