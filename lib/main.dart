@@ -157,13 +157,26 @@ class MyHomePage extends HookConsumerWidget {
       duration: const Duration(milliseconds: 200),
       reverseDuration: const Duration(milliseconds: 200),
     );
+    final animationControllerPwd = useAnimationController(
+      duration: const Duration(milliseconds: 200),
+      reverseDuration: const Duration(milliseconds: 200),
+    );
 
     ref.listen(
       deviceTypeProvider,
       (previous, next) {
         //isLoginButtonEnabled.value = enableLogin();
+        next == DeviceType.unknownModel
+            ? animationControllerPwd.forward()
+            : animationControllerPwd.reverse();
       },
     );
+
+    ref.listen(loginStateProvider, (previous, next) {
+      next == LoginState.loggedIn
+          ? animationController.forward()
+          : animationController.reverse();
+    });
 
     Future<void> confirmCmds(Future<void> Function() onConfirmed) async {
       var res = await showOkCancelAlertDialog(
@@ -211,9 +224,10 @@ class MyHomePage extends HookConsumerWidget {
                   ref.read(_ipAddressProvider.notifier).state = value;
                 },
               ),
-              AnimatedCrossFade(
-                firstChild: const SizedBox.shrink(),
-                secondChild: TextField(
+              SizeTransition(
+                sizeFactor: animationControllerPwd,
+                axisAlignment: -1,
+                child: TextField(
                   decoration: InputDecoration(
                     label: Text(t.password.i18n),
                   ),
@@ -224,10 +238,6 @@ class MyHomePage extends HookConsumerWidget {
                   enabled: deviceType == DeviceType.unknownModel,
                   obscureText: true,
                 ),
-                crossFadeState: deviceType == DeviceType.unknownModel
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 200),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -399,7 +409,6 @@ class MyHomePage extends HookConsumerWidget {
                         final state = ref.read(loginStateProvider.notifier);
                         if (state.state == LoginState.loggedIn) {
                           state.state = LoginState.idle;
-                          animationController.reverse();
                         } else {
                           logs.value = [];
                           state.state = LoginState.logging;
@@ -423,9 +432,6 @@ class MyHomePage extends HookConsumerWidget {
                                   success
                                       ? LoginState.loggedIn
                                       : LoginState.idle;
-                              if (success) {
-                                animationController.forward();
-                              }
                             },
                           );
                           await telnet.value?.startConnect();
