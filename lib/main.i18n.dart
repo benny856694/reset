@@ -23,6 +23,7 @@ const resetPassword = 'resetPassword';
 const success = 'success';
 const fail = 'fail';
 const startWatchDog = 'startWatchDog';
+const clearLogs = 'clearLogs';
 
 extension Localization on String {
   static const _t = Translations.from("en_us", {
@@ -117,6 +118,10 @@ extension Localization on String {
     startWatchDog: {
       "en_us": "Start Watchdog",
       "zh": "启动看门狗",
+    },
+    clearLogs: {
+      "en_us": "Clear",
+      "zh": "清除日志",
     },
   });
 

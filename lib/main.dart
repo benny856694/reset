@@ -207,8 +207,9 @@ class MyHomePage extends HookConsumerWidget {
                   ref.read(_ipAddressProvider.notifier).state = value;
                 },
               ),
-              if (deviceType == DeviceType.unknownModel)
-                TextField(
+              AnimatedCrossFade(
+                firstChild: const SizedBox.shrink(),
+                secondChild: TextField(
                   decoration: InputDecoration(
                     label: Text(t.password.i18n),
                   ),
@@ -218,7 +219,12 @@ class MyHomePage extends HookConsumerWidget {
                   },
                   enabled: deviceType == DeviceType.unknownModel,
                   obscureText: true,
-                ).animate().fadeIn().flipV(),
+                ),
+                crossFadeState: deviceType == DeviceType.unknownModel
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 200),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: LayoutBuilder(
@@ -342,98 +348,103 @@ class MyHomePage extends HookConsumerWidget {
               const SizedBox(
                 height: 8.0,
               ),
-              if (loginState == LoginState.loggedIn)
-                Wrap(
-                  spacing: 4.0,
-                  runSpacing: 8.0,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: loginState == LoginState.loggedIn
-                          ? () async {
-                              var res = await showOkCancelAlertDialog(
-                                context: context,
-                                title: t.areYouSure.i18n,
-                              );
-                              if (res == OkCancelResult.ok) {
-                                var cmds = [
-                                  ...buildResetCmds(ref
+              AnimatedCrossFade(
+                duration: const Duration(milliseconds: 200),
+                crossFadeState: loginState == LoginState.loggedIn
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                firstChild: const SizedBox.shrink(),
+                secondChild: Center(
+                  child: Wrap(
+                    spacing: 4.0,
+                    runSpacing: 8.0,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: loginState == LoginState.loggedIn
+                            ? () async {
+                                var res = await showOkCancelAlertDialog(
+                                  context: context,
+                                  title: t.areYouSure.i18n,
+                                );
+                                if (res == OkCancelResult.ok) {
+                                  var cmds = [
+                                    ...buildResetCmds(ref
+                                        .read(deviceTypeProvider.notifier)
+                                        .state),
+                                    rebootCmd,
+                                  ];
+                                  await telnet.value?.writeMultipleLines(cmds);
+                                }
+                              }
+                            : null,
+                        icon: const Icon(Icons.restore),
+                        label: Text(t.resetAndReboot.i18n),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: loginState == LoginState.loggedIn
+                            ? () async {
+                                var res = await showOkCancelAlertDialog(
+                                  context: context,
+                                  title: t.areYouSure.i18n,
+                                );
+                                if (res == OkCancelResult.ok) {
+                                  var cmds = buildResetCmds(ref
                                       .read(deviceTypeProvider.notifier)
-                                      .state),
-                                  rebootCmd,
-                                ];
-                                await telnet.value?.writeMultipleLines(cmds);
+                                      .state);
+                                  await telnet.value?.writeMultipleLines(cmds);
+                                }
                               }
-                            }
-                          : null,
-                      icon: const Icon(Icons.restore),
-                      label: Text(t.resetAndReboot.i18n),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: loginState == LoginState.loggedIn
-                          ? () async {
-                              var res = await showOkCancelAlertDialog(
-                                context: context,
-                                title: t.areYouSure.i18n,
-                              );
-                              if (res == OkCancelResult.ok) {
-                                var cmds = buildResetCmds(ref
-                                    .read(deviceTypeProvider.notifier)
-                                    .state);
-                                await telnet.value?.writeMultipleLines(cmds);
-                              }
-                            }
-                          : null,
-                      icon: const Icon(Icons.restore),
-                      label: Text(t.resetCfg.i18n),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: loginState == LoginState.loggedIn
-                          ? () async {
-                              var res = await showOkCancelAlertDialog(
-                                context: context,
-                                title: t.areYouSure.i18n,
-                              );
-                              if (res == OkCancelResult.ok) {
-                                telnet.value?.writeline(resetDingDingCmd);
-                              }
-                            }
-                          : null,
-                      icon: const Icon(Icons.restore),
-                      label: Text(t.resetDingDing.i18n),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: loginState == LoginState.loggedIn
-                          ? () async {
-                              final cmds = buildStartWatchdogCmds(deviceType);
-                              await confirmCmds(() async {
-                                telnet.value?.writeMultipleLines(cmds);
-                              });
-                            }
-                          : null,
-                      icon: const Icon(Icons.remove_red_eye),
-                      label: Text(
-                        t.startWatchDog.i18n,
+                            : null,
+                        icon: const Icon(Icons.restore),
+                        label: Text(t.resetCfg.i18n),
                       ),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: loginState == LoginState.loggedIn
-                          ? () async {
-                              await confirmCmds(() async {
-                                telnet.value?.writeline(rebootCmd);
-                              });
-                            }
-                          : null,
-                      icon: const Icon(Icons.play_arrow),
-                      label: Text(
-                        t.reboot.i18n,
+                      OutlinedButton.icon(
+                        onPressed: loginState == LoginState.loggedIn
+                            ? () async {
+                                var res = await showOkCancelAlertDialog(
+                                  context: context,
+                                  title: t.areYouSure.i18n,
+                                );
+                                if (res == OkCancelResult.ok) {
+                                  telnet.value?.writeline(resetDingDingCmd);
+                                }
+                              }
+                            : null,
+                        icon: const Icon(Icons.restore),
+                        label: Text(t.resetDingDing.i18n),
                       ),
-                    ),
-                  ],
-                )
-                    .animate()
-                    .effect(duration: 500.ms)
-                    .addEffect(const FadeEffect(begin: 0, end: 1)),
+                      OutlinedButton.icon(
+                        onPressed: loginState == LoginState.loggedIn
+                            ? () async {
+                                final cmds = buildStartWatchdogCmds(deviceType);
+                                await confirmCmds(() async {
+                                  telnet.value?.writeMultipleLines(cmds);
+                                });
+                              }
+                            : null,
+                        icon: const Icon(Icons.remove_red_eye),
+                        label: Text(
+                          t.startWatchDog.i18n,
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: loginState == LoginState.loggedIn
+                            ? () async {
+                                await confirmCmds(() async {
+                                  telnet.value?.writeline(rebootCmd);
+                                });
+                              }
+                            : null,
+                        icon: const Icon(Icons.play_arrow),
+                        label: Text(
+                          t.reboot.i18n,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(
                 height: 8.0,
               ),
@@ -443,15 +454,13 @@ class MyHomePage extends HookConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        Text(t.log.i18n),
-                        IconButton(
+                        Text(t.log.i18n,
+                            style: Theme.of(context).textTheme.titleMedium),
+                        TextButton(
                           onPressed: () {
                             logs.value = [];
                           },
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                          ),
+                          child: Text(t.clearLogs.i18n),
                         )
                       ],
                     ),
