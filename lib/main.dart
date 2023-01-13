@@ -153,6 +153,10 @@ class MyHomePage extends HookConsumerWidget {
     final scrollController = useScrollController();
     final deviceTypeDetails = ref.watch(deviceTypeDescProvider);
     final loginEnabled = ref.watch(loginEnabledProvider);
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 200),
+      reverseDuration: const Duration(milliseconds: 200),
+    );
 
     ref.listen(
       deviceTypeProvider,
@@ -269,13 +273,10 @@ class MyHomePage extends HookConsumerWidget {
                   },
                 ),
               ),
-              AnimatedCrossFade(
-                duration: const Duration(milliseconds: 200),
-                crossFadeState: loginState == LoginState.loggedIn
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                firstChild: const SizedBox.shrink(),
-                secondChild: Center(
+              SizeTransition(
+                sizeFactor: animationController,
+                axisAlignment: -1,
+                child: Center(
                   child: Wrap(
                     spacing: 4.0,
                     runSpacing: 8.0,
@@ -398,6 +399,7 @@ class MyHomePage extends HookConsumerWidget {
                         final state = ref.read(loginStateProvider.notifier);
                         if (state.state == LoginState.loggedIn) {
                           state.state = LoginState.idle;
+                          animationController.reverse();
                         } else {
                           logs.value = [];
                           state.state = LoginState.logging;
@@ -421,6 +423,9 @@ class MyHomePage extends HookConsumerWidget {
                                   success
                                       ? LoginState.loggedIn
                                       : LoginState.idle;
+                              if (success) {
+                                animationController.forward();
+                              }
                             },
                           );
                           await telnet.value?.startConnect();
