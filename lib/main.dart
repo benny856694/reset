@@ -269,85 +269,6 @@ class MyHomePage extends HookConsumerWidget {
                   },
                 ),
               ),
-              if (kDebugMode) ...[
-                OutlinedButton.icon(
-                  onPressed: ref.watch(ipAddressValidProvider)
-                      ? () async {
-                          await confirmCmds(() async {
-                            final suc = await resetPassword(
-                                ref.watch(_ipAddressProvider));
-                            logs.value = [
-                              ...logs.value,
-                              LogItem.fromString(
-                                  "${t.resetPassword.i18n}: ${suc ? t.success : t.fail}")
-                            ];
-                          });
-                        }
-                      : null,
-                  icon: const Icon(Icons.password_outlined),
-                  label: Text(t.resetPassword.i18n),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-              ],
-              OutlinedButton.icon(
-                onPressed: loginEnabled
-                    ? () async {
-                        telnet.value?.terminate();
-                        final state = ref.read(loginStateProvider.notifier);
-                        if (state.state == LoginState.loggedIn) {
-                          state.state = LoginState.idle;
-                        } else {
-                          logs.value = [];
-                          state.state = LoginState.logging;
-                          final pwd = ref.read(_passwordProvider);
-                          telnet.value = Telnet(
-                            ref.read(_ipAddressProvider.notifier).state,
-                            23,
-                            rootUserName,
-                            pwd,
-                            echoEnabled: false,
-                            onLog: (log) {
-                              final maskedLog =
-                                  log.log.replaceAll(pwd, '*' * pwd.length);
-                              logs.value = [
-                                ...logs.value,
-                                LogItem(log.id, maskedLog)
-                              ];
-                            },
-                            onLogin: (success) {
-                              ref.read(loginStateProvider.notifier).state =
-                                  success
-                                      ? LoginState.loggedIn
-                                      : LoginState.idle;
-                            },
-                          );
-                          await telnet.value?.startConnect();
-                        }
-                      }
-                    : null,
-                icon: loginState == LoginState.logging
-                    ? const SizedBox.square(
-                        dimension: 16.0,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.0,
-                        ),
-                      )
-                    : Icon(loginState == LoginState.loggedIn
-                        ? Icons.logout
-                        : Icons.login),
-                label: Text(
-                  loginState == LoginState.idle
-                      ? t.login.i18n
-                      : (loginState == LoginState.logging
-                          ? t.loggingin.i18n
-                          : t.logout.i18n),
-                ),
-              ),
-              const SizedBox(
-                height: 8.0,
-              ),
               AnimatedCrossFade(
                 duration: const Duration(milliseconds: 200),
                 crossFadeState: loginState == LoginState.loggedIn
@@ -448,6 +369,85 @@ class MyHomePage extends HookConsumerWidget {
               const SizedBox(
                 height: 8.0,
               ),
+              if (kDebugMode) ...[
+                OutlinedButton.icon(
+                  onPressed: ref.watch(ipAddressValidProvider)
+                      ? () async {
+                          await confirmCmds(() async {
+                            final suc = await resetPassword(
+                                ref.watch(_ipAddressProvider));
+                            logs.value = [
+                              ...logs.value,
+                              LogItem.fromString(
+                                  "${t.resetPassword.i18n}: ${suc ? t.success : t.fail}")
+                            ];
+                          });
+                        }
+                      : null,
+                  icon: const Icon(Icons.password_outlined),
+                  label: Text(t.resetPassword.i18n),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+              ],
+              OutlinedButton.icon(
+                onPressed: loginEnabled
+                    ? () async {
+                        telnet.value?.terminate();
+                        final state = ref.read(loginStateProvider.notifier);
+                        if (state.state == LoginState.loggedIn) {
+                          state.state = LoginState.idle;
+                        } else {
+                          logs.value = [];
+                          state.state = LoginState.logging;
+                          final pwd = ref.read(_passwordProvider);
+                          telnet.value = Telnet(
+                            ref.read(_ipAddressProvider.notifier).state,
+                            23,
+                            rootUserName,
+                            pwd,
+                            echoEnabled: false,
+                            onLog: (log) {
+                              final maskedLog =
+                                  log.log.replaceAll(pwd, '*' * pwd.length);
+                              logs.value = [
+                                ...logs.value,
+                                LogItem(log.id, maskedLog)
+                              ];
+                            },
+                            onLogin: (success) {
+                              ref.read(loginStateProvider.notifier).state =
+                                  success
+                                      ? LoginState.loggedIn
+                                      : LoginState.idle;
+                            },
+                          );
+                          await telnet.value?.startConnect();
+                        }
+                      }
+                    : null,
+                icon: loginState == LoginState.logging
+                    ? const SizedBox.square(
+                        dimension: 16.0,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.0,
+                        ),
+                      )
+                    : Icon(loginState == LoginState.loggedIn
+                        ? Icons.logout
+                        : Icons.login),
+                label: Text(
+                  loginState == LoginState.idle
+                      ? t.login.i18n
+                      : (loginState == LoginState.logging
+                          ? t.loggingin.i18n
+                          : t.logout.i18n),
+                ),
+              ),
+              const SizedBox(
+                height: 8.0,
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -455,7 +455,7 @@ class MyHomePage extends HookConsumerWidget {
                     Row(
                       children: [
                         Text(t.log.i18n,
-                            style: Theme.of(context).textTheme.titleMedium),
+                            style: Theme.of(context).textTheme.caption),
                         TextButton(
                           onPressed: () {
                             logs.value = [];
