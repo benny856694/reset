@@ -10,6 +10,7 @@ import 'package:i18n_extension/i18n_widget.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:io';
 import 'main.i18n.dart' as t;
+import 'package:path/path.dart' as p;
 
 enum DeviceType { oldModel, newModel, unknownModel }
 
@@ -72,21 +73,37 @@ final ipAddressValidProvider = Provider((ref) {
   return ipAddressExp.hasMatch(ipaddr);
 });
 
+final autoRunScriptProvider = StateProvider<bool>((ref) {
+  return true;
+});
+
+List<String>? customScripts;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-    await windowManager.ensureInitialized();
-
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(400, 700),
-      center: true,
-    );
-    await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+    final executableDirectory = File(Platform.resolvedExecutable).parent.path;
+    final scriptPath = p.join(executableDirectory, 'script.txt');
+    final scriptFile = File(scriptPath);
+    if (scriptFile.existsSync()) {
+      final lines = scriptFile.readAsLinesSync();
+      if (lines.isNotEmpty) {
+        customScripts = lines;
+      }
+    }
   }
+
+  await windowManager.ensureInitialized();
+
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(400, 700),
+    center: true,
+  );
+  await windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -160,6 +177,7 @@ class MyHomePage extends HookConsumerWidget {
       duration: const Duration(milliseconds: 200),
       reverseDuration: const Duration(milliseconds: 200),
     );
+    final autoRunScript = ref.watch(autoRunScriptProvider);
 
     ref.listen(
       deviceTypeProvider,
@@ -201,6 +219,7 @@ class MyHomePage extends HookConsumerWidget {
                   Text('增加重置双发平台'),
                   Text('增加清除广告文件'),
                   Text('增加启动看门狗命令'),
+                  Text('增加登录后自动运行脚本(script.txt)功能'),
                 ],
               );
             },
@@ -282,6 +301,18 @@ class MyHomePage extends HookConsumerWidget {
                   },
                 ),
               ),
+              if (customScripts != null)
+                Row(
+                  children: [
+                    Checkbox(
+                        value: autoRunScript,
+                        onChanged: (value) => {
+                              ref.read(autoRunScriptProvider.notifier).state =
+                                  value == true
+                            }),
+                    Text(t.autoRunScriptAfterLogin.i18n),
+                  ],
+                ),
               SizeTransition(
                 sizeFactor: animationController,
                 axisAlignment: -1,
@@ -431,6 +462,10 @@ class MyHomePage extends HookConsumerWidget {
                                   success
                                       ? LoginState.loggedIn
                                       : LoginState.idle;
+                              if (success && autoRunScript) {
+                                telnet.value
+                                    ?.writeMultipleLines(customScripts!);
+                              }
                             },
                           );
                           await telnet.value?.startConnect();
@@ -465,7 +500,7 @@ class MyHomePage extends HookConsumerWidget {
                     Row(
                       children: [
                         Text(t.log.i18n,
-                            style: Theme.of(context).textTheme.caption),
+                            style: Theme.of(context).textTheme.bodySmall),
                         TextButton(
                           onPressed: () {
                             logs.value = [];
