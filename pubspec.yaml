@@ -46,6 +46,9 @@ dependencies:
   flutter_animate: ^2.0.1
   dio: ^4.0.6
   path: ^1.8.2
+  tuple: ^2.0.1
+  dropdown_button2: ^1.9.2
+  url_launcher: ^6.1.9
 
 dev_dependencies:
   flutter_test:

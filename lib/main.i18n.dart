@@ -25,6 +25,7 @@ const fail = 'fail';
 const startWatchDog = 'startWatchDog';
 const clearLogs = 'clearLogs';
 const autoRunScriptAfterLogin = 'autoRunScript';
+const edit = 'edit';
 
 extension Localization on String {
   static const _t = Translations.from("en_us", {
@@ -127,6 +128,10 @@ extension Localization on String {
     autoRunScriptAfterLogin: {
       "en_us": "Auto run script",
       "zh": "自动执行脚本",
+    },
+    edit: {
+      "en_us": "Edit",
+      "zh": "编辑",
     },
   });
 

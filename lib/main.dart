@@ -1,4 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reset/commands.dart';
 import 'package:reset/telnet.dart';
 import 'package:i18n_extension/i18n_widget.dart';
+import 'package:tuple/tuple.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:io';
 import 'main.i18n.dart' as t;
@@ -77,27 +79,24 @@ final autoRunScriptProvider = StateProvider<bool>((ref) {
   return true;
 });
 
-List<String>? customScripts;
+List<Tuple3<String, String, List<String>>> customScripts = [];
+
+final selectedScriptsProvider =
+    StateProvider<Tuple3<String, String, List<String>>?>((ref) {
+  return null;
+});
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-    final executableDirectory = File(Platform.resolvedExecutable).parent.path;
-    final scriptPath = p.join(executableDirectory, 'script.txt');
-    final scriptFile = File(scriptPath);
-    if (scriptFile.existsSync()) {
-      final lines = scriptFile.readAsLinesSync();
-      if (lines.isNotEmpty) {
-        customScripts = lines;
-      }
-    }
+    enumerateScripts();
   }
 
   await windowManager.ensureInitialized();
 
   WindowOptions windowOptions = const WindowOptions(
-    size: Size(400, 700),
+    size: Size(500, 800),
     center: true,
   );
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -106,6 +105,25 @@ void main() async {
   });
 
   runApp(const ProviderScope(child: MyApp()));
+}
+
+void enumerateScripts() {
+  final executableDirectory = File(Platform.resolvedExecutable).parent.path;
+  final scriptsDirctoryPath = p.join(executableDirectory, 'scripts');
+  final scriptsDirectory = Directory(scriptsDirctoryPath);
+  if (scriptsDirectory.existsSync()) {
+    final scriptFiles = scriptsDirectory.listSync(followLinks: false).toList();
+    for (var file in scriptFiles) {
+      if (file.statSync().type == FileSystemEntityType.file) {
+        final scripts = File(file.path).readAsLinesSync();
+        if (scripts.isNotEmpty) {
+          final t =
+              Tuple3(p.basenameWithoutExtension(file.path), file.path, scripts);
+          customScripts.add(t);
+        }
+      }
+    }
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -178,6 +196,7 @@ class MyHomePage extends HookConsumerWidget {
       reverseDuration: const Duration(milliseconds: 200),
     );
     final autoRunScript = ref.watch(autoRunScriptProvider);
+    final selectedScripts = ref.watch(selectedScriptsProvider);
 
     ref.listen(
       deviceTypeProvider,
@@ -219,7 +238,8 @@ class MyHomePage extends HookConsumerWidget {
                   Text('增加重置双发平台'),
                   Text('增加清除广告文件'),
                   Text('增加启动看门狗命令'),
-                  Text('增加登录后自动运行脚本(script.txt)功能'),
+                  Text('增加登录后自动运行脚本(scripts目录)功能'),
+                  Text('增加选择脚本功能'),
                 ],
               );
             },
@@ -301,7 +321,7 @@ class MyHomePage extends HookConsumerWidget {
                   },
                 ),
               ),
-              if (customScripts != null)
+              if (customScripts.isNotEmpty)
                 Row(
                   children: [
                     Checkbox(
@@ -311,6 +331,35 @@ class MyHomePage extends HookConsumerWidget {
                                   value == true
                             }),
                     Text(t.autoRunScriptAfterLogin.i18n),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    DropdownButtonHideUnderline(
+                      child:
+                          DropdownButton2<Tuple3<String, String, List<String>>>(
+                        value: selectedScripts,
+                        items: customScripts
+                            .map((e) => DropdownMenuItem(
+                                value: e, child: Text(e.item1)))
+                            .toList(),
+                        onChanged: !autoRunScript
+                            ? null
+                            : (value) {
+                                ref
+                                    .read(selectedScriptsProvider.notifier)
+                                    .state = value;
+                              },
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    if (selectedScripts != null)
+                      OutlinedButton(
+                          onPressed: () async {
+                            Process.run("explorer", [selectedScripts.item2]);
+                          },
+                          child: Text(t.edit.i18n))
                   ],
                 ),
               SizeTransition(
@@ -462,9 +511,11 @@ class MyHomePage extends HookConsumerWidget {
                                   success
                                       ? LoginState.loggedIn
                                       : LoginState.idle;
-                              if (success && autoRunScript) {
+                              if (success &&
+                                  autoRunScript &&
+                                  selectedScripts != null) {
                                 telnet.value
-                                    ?.writeMultipleLines(customScripts!);
+                                    ?.writeMultipleLines(selectedScripts.item3);
                               }
                             },
                           );
