@@ -11,6 +11,7 @@ import 'package:i18n_extension/i18n_widget.dart';
 import 'package:tuple/tuple.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:io';
+import 'constants.dart';
 import 'main.i18n.dart' as t;
 import 'package:path/path.dart' as p;
 
@@ -126,11 +127,11 @@ void enumerateScripts() {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
@@ -148,7 +149,6 @@ class MyApp extends StatelessWidget {
         Locale("zh"),
       ],
       home: I18n(
-        //initialLocale: const Locale('zh'),
         child: const MyHomePage(),
       ),
     );
@@ -197,6 +197,8 @@ class MyHomePage extends HookConsumerWidget {
     );
     final autoRunScript = ref.watch(autoRunScriptProvider);
     final selectedScripts = ref.watch(selectedScriptsProvider);
+    final currentLocale = useState(
+        I18n.of(context).locale.languageCode == 'cn' ? chinese : english);
 
     ref.listen(
       deviceTypeProvider,
@@ -226,24 +228,47 @@ class MyHomePage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.appTitle.i18n),
+        title: Row(
+          children: [
+            Text(t.appTitle.i18n),
+            IconButton(
+              icon: const Icon(Icons.info),
+              onPressed: () {
+                showAboutDialog(
+                  context: context,
+                  applicationName: t.appTitle.i18n,
+                  children: const [
+                    Text('增加重置双发平台'),
+                    Text('增加清除广告文件'),
+                    Text('增加启动看门狗命令'),
+                    Text('增加登录后自动运行脚本(scripts目录)功能'),
+                    Text('增加选择脚本功能'),
+                  ],
+                );
+              },
+            )
+          ],
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.info),
-            onPressed: () {
-              showAboutDialog(
-                context: context,
-                applicationName: t.appTitle.i18n,
-                children: const [
-                  Text('增加重置双发平台'),
-                  Text('增加清除广告文件'),
-                  Text('增加启动看门狗命令'),
-                  Text('增加登录后自动运行脚本(scripts目录)功能'),
-                  Text('增加选择脚本功能'),
-                ],
-              );
-            },
-          )
+          Row(
+            children: [
+              const Icon(Icons.language),
+              const SizedBox(
+                width: 8,
+              ),
+              InkWell(
+                child: Text(currentLocale.value),
+                onTap: () {
+                  final v = currentLocale.value == chinese ? english : chinese;
+                  currentLocale.value = v;
+                  I18n.of(context).locale = Locale(v == chinese ? 'zh' : 'en');
+                },
+              ),
+              const SizedBox(
+                width: 16,
+              ),
+            ],
+          ),
         ],
       ),
       body: Center(

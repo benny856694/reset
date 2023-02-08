@@ -87,11 +87,11 @@ extension Localization on String {
     },
     oldModelDetails: {
       "en": "EV300, DV300",
-      //"zh": "重启",
+      "zh": "EV300, DV300",
     },
     newModelDetails: {
       "en": "DV350, EV500, DV350pro",
-      //"zh": "重启",
+      "zh": "DV350, EV500, DV350pro",
     },
     unknownModelDetails: {
       "en": "Please input password",
