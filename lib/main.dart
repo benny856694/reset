@@ -197,8 +197,8 @@ class MyHomePage extends HookConsumerWidget {
     );
     final autoRunScript = ref.watch(autoRunScriptProvider);
     final selectedScripts = ref.watch(selectedScriptsProvider);
-    final currentLocale = useState(
-        I18n.of(context).locale.languageCode == 'cn' ? chinese : english);
+    final currentLocale =
+        useState(I18n.localeStr.contains('zh') ? chinese : english);
 
     ref.listen(
       deviceTypeProvider,
