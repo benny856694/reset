@@ -28,109 +28,109 @@ const autoRunScriptAfterLogin = 'autoRunScript';
 const edit = 'edit';
 
 extension Localization on String {
-  static const _t = Translations.from("en_us", {
+  static const _t = Translations.from("zh", {
     appTitle: {
-      "en_us": "Reset Tool v1.0",
+      "en": "Reset Tool v1.0",
       "zh": "设备重置工具 v1.0",
     },
     ipAddress: {
-      "en_us": "IP Address",
+      "en": "IP Address",
       "zh": "IP地址",
     },
     password: {
-      "en_us": "Password",
+      "en": "Password",
       "zh": "密码",
     },
     deviceType: {
-      "en_us": "Device Type:",
+      "en": "Device Type:",
       "zh": "设备类型：",
     },
     oldModel: {
-      "en_us": "Old",
+      "en": "Old",
       "zh": "旧型号",
     },
     newModel: {
-      "en_us": "New",
+      "en": "New",
       "zh": "新型号",
     },
     unknowModel: {
-      "en_us": "Unknown",
+      "en": "Unknown",
       "zh": "其他型号",
     },
     login: {
-      "en_us": "Login",
+      "en": "Login",
       "zh": "登录",
     },
     loggingin: {
-      "en_us": "Login...",
+      "en": "Login...",
       "zh": "登录中...",
     },
     logout: {
-      "en_us": "Logout",
+      "en": "Logout",
       "zh": "退出登录",
     },
     resetCfg: {
-      "en_us": "Reset Cfg",
+      "en": "Reset Cfg",
       "zh": "重置",
     },
     resetAndReboot: {
-      "en_us": "Reset & Reboot",
+      "en": "Reset & Reboot",
       "zh": "重置并重启",
     },
     log: {
-      "en_us": "Logs",
+      "en": "Logs",
       "zh": "日志",
     },
     reboot: {
-      "en_us": "Reboot",
+      "en": "Reboot",
       "zh": "重启",
     },
     oldModelDetails: {
-      "en_us": "EV300, DV300",
+      "en": "EV300, DV300",
       //"zh": "重启",
     },
     newModelDetails: {
-      "en_us": "DV350, EV500, DV350pro",
+      "en": "DV350, EV500, DV350pro",
       //"zh": "重启",
     },
     unknownModelDetails: {
-      "en_us": "Please input password",
+      "en": "Please input password",
       "zh": "请输入密码",
     },
     resetDingDing: {
-      "en_us": "Reset DD",
+      "en": "Reset DD",
       "zh": "重置钉钉",
     },
     areYouSure: {
-      "en_us": "Send selected command?",
+      "en": "Send selected command?",
       "zh": "下发选定的命令？",
     },
     resetPassword: {
-      "en_us": "Reset Password",
+      "en": "Reset Password",
       "zh": "重置密码",
     },
     success: {
-      "en_us": "Succeed",
+      "en": "Succeed",
       "zh": "成功",
     },
     fail: {
-      "en_us": "Failed",
+      "en": "Failed",
       "zh": "失败",
     },
     startWatchDog: {
-      "en_us": "Start Watchdog",
+      "en": "Start Watchdog",
       "zh": "启动看门狗",
     },
     clearLogs: {
-      "en_us": "Clear",
+      "en": "Clear",
       "zh": "清除日志",
     },
     autoRunScriptAfterLogin: {
-      "en_us": "Auto run script",
+      "en": "Auto run script",
       "zh": "自动执行脚本",
     },
     edit: {
-      "en_us": "Edit",
+      "en": "Edit",
       "zh": "编辑",
     },
   });

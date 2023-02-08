@@ -144,8 +144,8 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale("en", "US"),
-        Locale("zh", "CN"),
+        Locale("en"),
+        Locale("zh"),
       ],
       home: I18n(
         //initialLocale: const Locale('zh'),
