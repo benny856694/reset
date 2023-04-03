@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:telnet/telnet.dart';
 
 class LogItem {
@@ -116,7 +117,12 @@ class Telnet {
       //  onLog?.call(LogItem(id++, "[WRITE] ${event.msg}"));
     } else if (event.type == TLMsgEventType.read) {
       if (event.msg.runtimeType != TLOptMsg) {
-        onLog?.call(LogItem.fromString("[READ] ${event.msg}"));
+        final txts = utf8.decode(event.msg.bytes, allowMalformed: true);
+        final splits = txts.split('\r\n');
+        for (var element in splits
+            .where((element) => element.isNotEmpty && element != '\r')) {
+          onLog?.call(LogItem.fromString("[READ] $element"));
+        }
       }
 
       if (event.msg is TLOptMsg) {
