@@ -33,6 +33,12 @@ Future<bool> resetPassword(String ip) async {
   }
 }
 
+const resetTouchScreenPasswordCmds = [
+  'rm -f /data_fs/config/open_gate_pwd.bin',
+  'rm -f /data_fs/config/manager_pwd.bin',
+  'rm -f /data_fs/config/general_pwd.bin',
+];
+
 const cdHome = 'cd /home';
 
 const startWatchDogDV300 = './wdgagent';

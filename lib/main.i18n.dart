@@ -26,6 +26,7 @@ const startWatchDog = 'startWatchDog';
 const clearLogs = 'clearLogs';
 const autoRunScriptAfterLogin = 'autoRunScript';
 const edit = 'edit';
+const resetTouchScreenPwds = 'resetTouchScreenPwds';
 
 extension Localization on String {
   static const _t = Translations.from("zh", {
@@ -132,6 +133,10 @@ extension Localization on String {
     edit: {
       "en": "Edit",
       "zh": "编辑",
+    },
+    resetTouchScreenPwds: {
+      "en": "Reset Touch Pwds",
+      "zh": "重置触屏密码",
     },
   });
 

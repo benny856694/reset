@@ -243,6 +243,7 @@ class MyHomePage extends HookConsumerWidget {
                     Text('增加启动看门狗命令'),
                     Text('增加登录后自动运行脚本(scripts目录)功能'),
                     Text('增加选择脚本功能'),
+                    Text('增加重置触屏密码功能'),
                   ],
                 );
               },
@@ -434,6 +435,22 @@ class MyHomePage extends HookConsumerWidget {
                             : null,
                         icon: const Icon(Icons.restore),
                         label: Text(t.resetCfg.i18n),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: loginState == LoginState.loggedIn
+                            ? () async {
+                                var res = await showOkCancelAlertDialog(
+                                  context: context,
+                                  title: t.areYouSure.i18n,
+                                );
+                                if (res == OkCancelResult.ok) {
+                                  var cmds = resetTouchScreenPasswordCmds;
+                                  await telnet.value?.writeMultipleLines(cmds);
+                                }
+                              }
+                            : null,
+                        icon: const Icon(Icons.restore),
+                        label: Text(t.resetTouchScreenPwds.i18n),
                       ),
                       OutlinedButton.icon(
                         onPressed: loginState == LoginState.loggedIn
