@@ -137,7 +137,7 @@ extension Localization on String {
     },
     reload: {
       "en": "Reload",
-      "zh": "刷新",
+      "zh": "重载",
     },
     resetTouchScreenPwds: {
       "en": "Reset Touch Pwds",

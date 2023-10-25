@@ -213,6 +213,7 @@ class MyHomePage extends HookConsumerWidget {
     final scriptEdited = ref.watch(scriptEditedProvider);
     final customScripts = ref.watch(customScriptsProvider);
 
+    "=====".log();
     customScripts.log();
 
     ref.listen(
@@ -232,9 +233,9 @@ class MyHomePage extends HookConsumerWidget {
     });
 
     ref.listen(scriptEditedProvider, (previous, next) {
-      if (next) {
-        ref.invalidate(customScriptsProvider);
-      }
+      //if (next) {
+      //ref.invalidate(customScriptsProvider);
+      //}
     });
 
     Future<void> confirmCmds(Future<void> Function() onConfirmed) async {
@@ -404,7 +405,7 @@ class MyHomePage extends HookConsumerWidget {
                     if (selectedScripts != null)
                       OutlinedButton(
                           onPressed: () async {
-                            //Process.run("explorer", [selectedScripts.item2]);
+                            Process.run("explorer", [selectedScripts.item2]);
                             ref.read(scriptEditedProvider.notifier).state =
                                 true;
                           },
@@ -416,8 +417,11 @@ class MyHomePage extends HookConsumerWidget {
                       OutlinedButton(
                           onPressed: () async {
                             enumerateScripts();
+                            ref.read(selectedScriptsProvider.notifier).state =
+                                null;
                             ref.read(scriptEditedProvider.notifier).state =
                                 false;
+                            ref.invalidate(customScriptsProvider);
                           },
                           child: Text(t.reload.i18n)),
                   ],
