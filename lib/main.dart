@@ -93,10 +93,6 @@ final selectedScriptsProvider = StateProvider<ScriptFile?>((ref) {
   return null;
 });
 
-final scriptEditedProvider = StateProvider<bool>((ref) {
-  return false;
-});
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -206,7 +202,6 @@ class MyHomePage extends HookConsumerWidget {
     final selectedScripts = ref.watch(selectedScriptsProvider);
     final currentLocale =
         useState(I18n.localeStr.contains('zh') ? chinese : english);
-    final scriptEdited = ref.watch(scriptEditedProvider);
     final customScripts = ref.watch(customScriptsProvider);
 
     ref.listen(
@@ -223,12 +218,6 @@ class MyHomePage extends HookConsumerWidget {
       next == LoginState.loggedIn
           ? animationController.forward()
           : animationController.reverse();
-    });
-
-    ref.listen(scriptEditedProvider, (previous, next) {
-      //if (next) {
-      //ref.invalidate(customScriptsProvider);
-      //}
     });
 
     Future<void> confirmCmds(Future<void> Function() onConfirmed) async {
@@ -398,24 +387,11 @@ class MyHomePage extends HookConsumerWidget {
                       OutlinedButton(
                           onPressed: () async {
                             Process.run("explorer", [selectedScripts.item2]);
-                            ref.read(scriptEditedProvider.notifier).state =
-                                true;
                           },
                           child: Text(t.edit.i18n)),
                     const SizedBox(
                       width: 8,
                     ),
-                    if (scriptEdited)
-                      OutlinedButton(
-                          onPressed: () async {
-                            enumerateScripts();
-                            // ref.read(selectedScriptsProvider.notifier).state =
-                            //   null;
-                            ref.read(scriptEditedProvider.notifier).state =
-                                false;
-                            ref.invalidate(customScriptsProvider);
-                          },
-                          child: Text(t.reload.i18n)),
                   ],
                 ),
               SizeTransition(
