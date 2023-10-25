@@ -97,7 +97,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-    enumerateScripts();
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
       size: Size(500, 800),
