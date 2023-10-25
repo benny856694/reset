@@ -213,9 +213,6 @@ class MyHomePage extends HookConsumerWidget {
     final scriptEdited = ref.watch(scriptEditedProvider);
     final customScripts = ref.watch(customScriptsProvider);
 
-    "=====".log();
-    customScripts.log();
-
     ref.listen(
       deviceTypeProvider,
       (previous, next) {
@@ -417,8 +414,8 @@ class MyHomePage extends HookConsumerWidget {
                       OutlinedButton(
                           onPressed: () async {
                             enumerateScripts();
-                            ref.read(selectedScriptsProvider.notifier).state =
-                                null;
+                           // ref.read(selectedScriptsProvider.notifier).state =
+                             //   null;
                             ref.read(scriptEditedProvider.notifier).state =
                                 false;
                             ref.invalidate(customScriptsProvider);
