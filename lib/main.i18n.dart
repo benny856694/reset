@@ -27,6 +27,7 @@ const clearLogs = 'clearLogs';
 const autoRunScriptAfterLogin = 'autoRunScript';
 const edit = 'edit';
 const resetTouchScreenPwds = 'resetTouchScreenPwds';
+const reload = 'reload';
 
 extension Localization on String {
   static const _t = Translations.from("zh", {
@@ -133,6 +134,10 @@ extension Localization on String {
     edit: {
       "en": "Edit",
       "zh": "编辑",
+    },
+    reload: {
+      "en": "Reload",
+      "zh": "刷新",
     },
     resetTouchScreenPwds: {
       "en": "Reset Touch Pwds",

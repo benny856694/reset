@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reset/commands.dart';
+import 'package:reset/extensions.dart';
 import 'package:reset/telnet.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:tuple/tuple.dart';
@@ -80,11 +81,20 @@ final autoRunScriptProvider = StateProvider<bool>((ref) {
   return true;
 });
 
-List<Tuple3<String, String, List<String>>> customScripts = [];
+final customScriptsProvider =
+    StateProvider<List<Tuple3<String, String, List<String>>>>(
+  (ref) {
+    return enumerateScripts();
+  },
+);
 
 final selectedScriptsProvider =
     StateProvider<Tuple3<String, String, List<String>>?>((ref) {
   return null;
+});
+
+final scriptEditedProvider = StateProvider<bool>((ref) {
+  return false;
 });
 
 void main() async {
@@ -106,7 +116,8 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-void enumerateScripts() {
+List<Tuple3<String, String, List<String>>> enumerateScripts() {
+  var customScripts = <Tuple3<String, String, List<String>>>[];
   final executableDirectory = File(Platform.resolvedExecutable).parent.path;
   final scriptsDirctoryPath = p.join(executableDirectory, 'scripts');
   final scriptsDirectory = Directory(scriptsDirctoryPath);
@@ -123,6 +134,8 @@ void enumerateScripts() {
       }
     }
   }
+
+  return customScripts;
 }
 
 class MyApp extends ConsumerWidget {
@@ -197,6 +210,10 @@ class MyHomePage extends HookConsumerWidget {
     final selectedScripts = ref.watch(selectedScriptsProvider);
     final currentLocale =
         useState(I18n.localeStr.contains('zh') ? chinese : english);
+    final scriptEdited = ref.watch(scriptEditedProvider);
+    final customScripts = ref.watch(customScriptsProvider);
+
+    customScripts.log();
 
     ref.listen(
       deviceTypeProvider,
@@ -212,6 +229,12 @@ class MyHomePage extends HookConsumerWidget {
       next == LoginState.loggedIn
           ? animationController.forward()
           : animationController.reverse();
+    });
+
+    ref.listen(scriptEditedProvider, (previous, next) {
+      if (next) {
+        ref.invalidate(customScriptsProvider);
+      }
     });
 
     Future<void> confirmCmds(Future<void> Function() onConfirmed) async {
@@ -381,9 +404,22 @@ class MyHomePage extends HookConsumerWidget {
                     if (selectedScripts != null)
                       OutlinedButton(
                           onPressed: () async {
-                            Process.run("explorer", [selectedScripts.item2]);
+                            //Process.run("explorer", [selectedScripts.item2]);
+                            ref.read(scriptEditedProvider.notifier).state =
+                                true;
                           },
-                          child: Text(t.edit.i18n))
+                          child: Text(t.edit.i18n)),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    if (scriptEdited)
+                      OutlinedButton(
+                          onPressed: () async {
+                            enumerateScripts();
+                            ref.read(scriptEditedProvider.notifier).state =
+                                false;
+                          },
+                          child: Text(t.reload.i18n)),
                   ],
                 ),
               SizeTransition(
