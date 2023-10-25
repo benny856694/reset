@@ -16,6 +16,8 @@ import 'constants.dart';
 import 'main.i18n.dart' as t;
 import 'package:path/path.dart' as p;
 
+typedef ScriptFile = Tuple2<String, String>;
+
 enum DeviceType { oldModel, newModel, unknownModel }
 
 enum LoginState { idle, logging, loggedIn }
@@ -81,15 +83,13 @@ final autoRunScriptProvider = StateProvider<bool>((ref) {
   return true;
 });
 
-final customScriptsProvider =
-    StateProvider<List<Tuple3<String, String, List<String>>>>(
+final customScriptsProvider = StateProvider<List<ScriptFile>>(
   (ref) {
     return enumerateScripts();
   },
 );
 
-final selectedScriptsProvider =
-    StateProvider<Tuple3<String, String, List<String>>?>((ref) {
+final selectedScriptsProvider = StateProvider<ScriptFile?>((ref) {
   return null;
 });
 
@@ -116,8 +116,8 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-List<Tuple3<String, String, List<String>>> enumerateScripts() {
-  var customScripts = <Tuple3<String, String, List<String>>>[];
+List<ScriptFile> enumerateScripts() {
+  var customScripts = <ScriptFile>[];
   final executableDirectory = File(Platform.resolvedExecutable).parent.path;
   final scriptsDirctoryPath = p.join(executableDirectory, 'scripts');
   final scriptsDirectory = Directory(scriptsDirctoryPath);
@@ -125,12 +125,8 @@ List<Tuple3<String, String, List<String>>> enumerateScripts() {
     final scriptFiles = scriptsDirectory.listSync(followLinks: false).toList();
     for (var file in scriptFiles) {
       if (file.statSync().type == FileSystemEntityType.file) {
-        final scripts = File(file.path).readAsLinesSync();
-        if (scripts.isNotEmpty) {
-          final t =
-              Tuple3(p.basenameWithoutExtension(file.path), file.path, scripts);
-          customScripts.add(t);
-        }
+        final t = ScriptFile(p.basenameWithoutExtension(file.path), file.path);
+        customScripts.add(t);
       }
     }
   }
@@ -380,8 +376,7 @@ class MyHomePage extends HookConsumerWidget {
                       width: 8,
                     ),
                     DropdownButtonHideUnderline(
-                      child:
-                          DropdownButton2<Tuple3<String, String, List<String>>>(
+                      child: DropdownButton2<ScriptFile>(
                         value: selectedScripts,
                         items: customScripts
                             .map((e) => DropdownMenuItem(
@@ -414,8 +409,8 @@ class MyHomePage extends HookConsumerWidget {
                       OutlinedButton(
                           onPressed: () async {
                             enumerateScripts();
-                           // ref.read(selectedScriptsProvider.notifier).state =
-                             //   null;
+                            // ref.read(selectedScriptsProvider.notifier).state =
+                            //   null;
                             ref.read(scriptEditedProvider.notifier).state =
                                 false;
                             ref.invalidate(customScriptsProvider);
@@ -591,8 +586,9 @@ class MyHomePage extends HookConsumerWidget {
                               if (success &&
                                   autoRunScript &&
                                   selectedScripts != null) {
-                                telnet.value
-                                    ?.writeMultipleLines(selectedScripts.item3);
+                                final scripts = File(selectedScripts.item2)
+                                    .readAsLinesSync();
+                                telnet.value?.writeMultipleLines(scripts);
                               }
                             },
                           );
