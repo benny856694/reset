@@ -58,11 +58,12 @@ final loginStateProvider = StateProvider((_) => LoginState.idle);
 final loginEnabledProvider = Provider((ref) {
   final loginState = ref.watch(loginStateProvider);
   final pwd = ref.watch(_passwordProvider);
+  final ipAddressValid = ref.watch(ipAddressValidProvider);
 
   var result = false;
   switch (loginState) {
     case LoginState.idle:
-      result = ref.watch(ipAddressValidProvider) && pwd.isNotEmpty;
+      result = ipAddressValid && pwd.isNotEmpty;
       break;
     case LoginState.logging:
       result = false;
@@ -75,11 +76,12 @@ final loginEnabledProvider = Provider((ref) {
   return result;
 });
 
-final _ipAddressProvider = StateProvider((_) => '');
-
 final ipAddressValidProvider = Provider((ref) {
-  final ipaddr = ref.watch(_ipAddressProvider);
-  return ipAddressExp.hasMatch(ipaddr);
+  final ipaddr = ref.watch(ipAddressProvider);
+  return switch (ipaddr) {
+    AsyncData(:final value) => ipAddressExp.hasMatch(value),
+    _ => false,
+  };
 });
 
 final autoRunScriptProvider = StateProvider<bool>((ref) {
@@ -96,15 +98,32 @@ final selectedScriptsProvider = StateProvider<ScriptFile?>((ref) {
   return null;
 });
 
-const keyIpaddress = "ip_address";
+//ipaddress
+const String keyIpAddress = "last_ip_address";
 
-class IpAddressNotifier extends AsyncNotifier<String> {
+class AsyncIpAddressNotifier extends AsyncNotifier<String> {
+  late SharedPreferences _prefs;
+
+  Future<String> _fetchIp() async {
+    _prefs = await SharedPreferences.getInstance();
+    return _prefs.getString(keyIpAddress) ?? '';
+  }
+
   @override
   FutureOr<String> build() async {
-    final pref = await SharedPreferences.getInstance();
-    return pref.getString(keyIpaddress) ?? '';
+    return _fetchIp();
+  }
+
+  Future<void> setIpAddress(String ip) async {
+    await _prefs.setString(keyIpAddress, ip);
+    state = await AsyncValue.guard(() async {
+      return _fetchIp();
+    });
   }
 }
+
+final ipAddressProvider = AsyncNotifierProvider<AsyncIpAddressNotifier, String>(
+    () => AsyncIpAddressNotifier());
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -120,8 +139,6 @@ void main() async {
       await windowManager.focus();
     });
   }
-
-  final pref = await SharedPreferences.getInstance();
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -217,6 +234,7 @@ class MyHomePage extends HookConsumerWidget {
     final currentLocale =
         useState(I18n.localeStr.contains('zh') ? chinese : english);
     final customScripts = ref.watch(customScriptsProvider);
+    final ipAddress = ref.watch(ipAddressProvider);
 
     ref.listen(
       deviceTypeProvider,
@@ -298,12 +316,20 @@ class MyHomePage extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               TextField(
+                controller: switch (ipAddress) {
+                  AsyncData(:final value) =>
+                    useTextEditingController(text: value),
+                  _ => null,
+                },
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   label: Text(t.ipAddress.i18n),
                 ),
-                onChanged: (value) {
-                  ref.read(_ipAddressProvider.notifier).state = value;
+                onChanged: (value) async {
+                  value.log();
+                  await ref
+                      .read(ipAddressProvider.notifier)
+                      .setIpAddress(value);
                 },
               ),
               SizeTransition(
@@ -526,13 +552,14 @@ class MyHomePage extends HookConsumerWidget {
                   onPressed: ref.watch(ipAddressValidProvider)
                       ? () async {
                           await confirmCmds(() async {
-                            final suc = await resetPassword(
-                                ref.watch(_ipAddressProvider));
-                            logs.value = [
-                              ...logs.value,
-                              LogItem.fromString(
-                                  "${t.resetPassword.i18n}: ${suc ? t.success : t.fail}")
-                            ];
+                            ipAddress.whenData((ip) async {
+                              final suc = await resetPassword(ip);
+                              logs.value = [
+                                ...logs.value,
+                                LogItem.fromString(
+                                    "${t.resetPassword.i18n}: ${suc ? t.success : t.fail}")
+                              ];
+                            });
                           });
                         }
                       : null,
@@ -554,35 +581,37 @@ class MyHomePage extends HookConsumerWidget {
                           logs.value = [];
                           state.state = LoginState.logging;
                           final pwd = ref.read(_passwordProvider);
-                          telnet.value = Telnet(
-                            ref.read(_ipAddressProvider.notifier).state,
-                            23,
-                            rootUserName,
-                            pwd,
-                            echoEnabled: false,
-                            onLog: (log) {
-                              final maskedLog =
-                                  log.log.replaceAll(pwd, '*' * pwd.length);
-                              logs.value = [
-                                ...logs.value,
-                                LogItem(log.id, maskedLog)
-                              ];
-                            },
-                            onLogin: (success) {
-                              ref.read(loginStateProvider.notifier).state =
-                                  success
-                                      ? LoginState.loggedIn
-                                      : LoginState.idle;
-                              if (success &&
-                                  autoRunScript &&
-                                  selectedScripts != null) {
-                                final scripts = File(selectedScripts.item2)
-                                    .readAsLinesSync();
-                                telnet.value?.writeMultipleLines(scripts);
-                              }
-                            },
-                          );
-                          await telnet.value?.startConnect();
+                          ipAddress.whenData((ip) async {
+                            telnet.value = Telnet(
+                              ip,
+                              23,
+                              rootUserName,
+                              pwd,
+                              echoEnabled: false,
+                              onLog: (log) {
+                                final maskedLog =
+                                    log.log.replaceAll(pwd, '*' * pwd.length);
+                                logs.value = [
+                                  ...logs.value,
+                                  LogItem(log.id, maskedLog)
+                                ];
+                              },
+                              onLogin: (success) {
+                                ref.read(loginStateProvider.notifier).state =
+                                    success
+                                        ? LoginState.loggedIn
+                                        : LoginState.idle;
+                                if (success &&
+                                    autoRunScript &&
+                                    selectedScripts != null) {
+                                  final scripts = File(selectedScripts.item2)
+                                      .readAsLinesSync();
+                                  telnet.value?.writeMultipleLines(scripts);
+                                }
+                              },
+                            );
+                            await telnet.value?.startConnect();
+                          });
                         }
                       }
                     : null,
