@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +11,7 @@ import 'package:reset/commands.dart';
 import 'package:reset/extensions.dart';
 import 'package:reset/telnet.dart';
 import 'package:i18n_extension/i18n_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:io';
@@ -93,6 +96,16 @@ final selectedScriptsProvider = StateProvider<ScriptFile?>((ref) {
   return null;
 });
 
+const keyIpaddress = "ip_address";
+
+class IpAddressNotifier extends AsyncNotifier<String> {
+  @override
+  FutureOr<String> build() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getString(keyIpaddress) ?? '';
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -107,6 +120,8 @@ void main() async {
       await windowManager.focus();
     });
   }
+
+  final pref = await SharedPreferences.getInstance();
 
   runApp(const ProviderScope(child: MyApp()));
 }
