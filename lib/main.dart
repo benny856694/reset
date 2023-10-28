@@ -79,7 +79,7 @@ final loginEnabledProvider = Provider((ref) {
 final ipAddressValidProvider = Provider((ref) {
   final ipaddr = ref.watch(ipAddressProvider);
   return switch (ipaddr) {
-    AsyncData(:final value) => ipAddressExp.hasMatch(value),
+    AsyncData(value: final ip) => ipAddressExp.hasMatch(ip),
     _ => false,
   };
 });
