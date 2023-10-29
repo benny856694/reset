@@ -113,6 +113,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.3"
+  ctelnet:
+    dependency: "direct main"
+    description:
+      name: ctelnet
+      sha256: "06b203b33a8cc3da3cd1d464deeb5e80f0a70ba98e68b8c25d9ffbf058437d7f"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.5"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -723,5 +731,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.1.0 <4.0.0"
+  dart: ">=3.1.2 <4.0.0"
   flutter: ">=3.13.0"

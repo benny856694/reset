@@ -11,13 +11,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:path/path.dart' as p;
+import 'package:reset/ctelnet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:tuple/tuple.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:reset/commands.dart';
 import 'package:reset/extensions.dart';
-import 'package:reset/telnet.dart';
 
 import 'constants.dart';
 import 'main.i18n.dart' as t;
@@ -234,7 +235,7 @@ class MyHomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final deviceType = ref.watch(deviceTypeProvider);
     final loginState = ref.watch(loginStateProvider);
-    final telnet = useState<Telnet?>(null);
+    final telnet = useState<MyTelnetClient?>(null);
     final logs = useState(<LogItem>[]);
     final scrollController = useScrollController();
     final deviceTypeDetails = ref.watch(deviceTypeDescProvider);
@@ -613,12 +614,14 @@ class MyHomePage extends HookConsumerWidget {
                           state.state = LoginState.logging;
                           final pwd = ref.read(_passwordProvider);
                           ipAddress.whenData((ip) async {
-                            telnet.value = Telnet(
-                              ip,
-                              23,
-                              rootUserName,
-                              pwd,
-                              echoEnabled: false,
+                            telnet.value = MyTelnetClient(
+                              host: ip,
+                              port: 23,
+                              user: rootUserName,
+                              password: pwd,
+                              onConnect: () {},
+                              onDisconnect: () {},
+                              onError: (msg) {},
                               onLog: (log) {
                                 final maskedLog =
                                     log.log.replaceAll(pwd, '*' * pwd.length);
@@ -643,7 +646,7 @@ class MyHomePage extends HookConsumerWidget {
                                 });
                               },
                             );
-                            await telnet.value?.startConnect();
+                            await telnet.value?.connect();
                           });
                         }
                       }
