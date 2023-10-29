@@ -620,6 +620,7 @@ class MyHomePage extends HookConsumerWidget {
                               port: 23,
                               user: rootUserName,
                               password: pwd,
+                              timeout: const Duration(seconds: 2),
                               onConnect: () {},
                               onDisconnect: () {},
                               onError: (msg) {},

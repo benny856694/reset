@@ -47,6 +47,7 @@ class MyTelnetClient {
     _client = CTelnetClient(
         host: host,
         port: port,
+        timeout: timeout,
         onConnect: onConnect,
         onDisconnect: onDisconnect,
         onData: _onData,
