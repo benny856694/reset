@@ -1,23 +1,26 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
+import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:reset/commands.dart';
-import 'package:reset/extensions.dart';
-import 'package:reset/telnet.dart';
 import 'package:i18n_extension/i18n_widget.dart';
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import 'package:window_manager/window_manager.dart';
-import 'dart:io';
+
+import 'package:reset/commands.dart';
+import 'package:reset/extensions.dart';
+import 'package:reset/telnet.dart';
+
 import 'constants.dart';
 import 'main.i18n.dart' as t;
-import 'package:path/path.dart' as p;
 
 typedef ScriptFile = Tuple2<String, String>;
 
@@ -84,10 +87,6 @@ final ipAddressValidProvider = Provider((ref) {
   };
 });
 
-final autoRunScriptProvider = StateProvider<bool>((ref) {
-  return true;
-});
-
 final customScriptsProvider = StateProvider<List<ScriptFile>>(
   (ref) {
     return enumerateScripts();
@@ -99,31 +98,50 @@ final selectedScriptsProvider = StateProvider<ScriptFile?>((ref) {
 });
 
 //ipaddress
-const String keyIpAddress = "last_ip_address";
 
-class AsyncIpAddressNotifier extends AsyncNotifier<String> {
+class AsyncPrefValueNotifier<T> extends AsyncNotifier<T> {
   late SharedPreferences _prefs;
+  String key;
+  AsyncPrefValueNotifier({
+    required this.key,
+  });
 
-  Future<String> _fetchIp() async {
+  Future<T> _fetch() async {
     _prefs = await SharedPreferences.getInstance();
-    return _prefs.getString(keyIpAddress) ?? '';
+    final value = switch (T) {
+      String => _prefs.getString(key) ?? '',
+      bool => _prefs.getBool(key) ?? false,
+      _ => throw Exception('not supported type'),
+    };
+
+    return value as T;
   }
 
   @override
-  FutureOr<String> build() async {
-    return _fetchIp();
+  FutureOr<T> build() async {
+    return _fetch();
   }
 
-  Future<void> setIpAddress(String ip) async {
-    await _prefs.setString(keyIpAddress, ip);
+  Future<void> set(T value) async {
+    final _ = switch (T) {
+      String => await _prefs.setString(key, value as String),
+      bool => await _prefs.setBool(key, value as bool),
+      _ => throw Exception('not supported type'),
+    };
+    //await _prefs.setString(key, value);
     state = await AsyncValue.guard(() async {
-      return _fetchIp();
+      return _fetch();
     });
   }
 }
 
-final ipAddressProvider = AsyncNotifierProvider<AsyncIpAddressNotifier, String>(
-    () => AsyncIpAddressNotifier());
+final ipAddressProvider =
+    AsyncNotifierProvider<AsyncPrefValueNotifier<String>, String>(
+        () => AsyncPrefValueNotifier(key: 'last_ip_address'));
+
+final autoExecScriptProvider =
+    AsyncNotifierProvider<AsyncPrefValueNotifier<bool>, bool>(
+        () => AsyncPrefValueNotifier(key: 'auto_exec_script_on_login'));
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -229,12 +247,12 @@ class MyHomePage extends HookConsumerWidget {
       duration: const Duration(milliseconds: 200),
       reverseDuration: const Duration(milliseconds: 200),
     );
-    final autoRunScript = ref.watch(autoRunScriptProvider);
     final selectedScripts = ref.watch(selectedScriptsProvider);
     final currentLocale =
         useState(I18n.localeStr.contains('zh') ? chinese : english);
     final customScripts = ref.watch(customScriptsProvider);
     final ipAddress = ref.watch(ipAddressProvider);
+    final autoExecScript = ref.watch(autoExecScriptProvider);
 
     ref.listen(
       deviceTypeProvider,
@@ -274,12 +292,13 @@ class MyHomePage extends HookConsumerWidget {
                   context: context,
                   applicationName: t.appTitle.i18n,
                   children: const [
-                    Text('增加重置双发平台'),
-                    Text('增加清除广告文件'),
-                    Text('增加启动看门狗命令'),
-                    Text('增加登录后自动运行脚本(scripts目录)功能'),
-                    Text('增加选择脚本功能'),
-                    Text('增加重置触屏密码功能'),
+                    Text('重置双发平台'),
+                    Text('清除广告文件'),
+                    Text('启动看门狗命令'),
+                    Text('登录后自动运行脚本(scripts目录)'),
+                    Text('选择脚本功能'),
+                    Text('重置触屏密码功能'),
+                    Text('自动保存IP地址'),
                   ],
                 );
               },
@@ -327,9 +346,7 @@ class MyHomePage extends HookConsumerWidget {
                 ),
                 onChanged: (value) async {
                   value.log();
-                  await ref
-                      .read(ipAddressProvider.notifier)
-                      .setIpAddress(value);
+                  await ref.read(ipAddressProvider.notifier).set(value);
                 },
               ),
               SizeTransition(
@@ -395,30 +412,44 @@ class MyHomePage extends HookConsumerWidget {
                 Row(
                   children: [
                     Checkbox(
-                        value: autoRunScript,
-                        onChanged: (value) => {
-                              ref.read(autoRunScriptProvider.notifier).state =
-                                  value == true
-                            }),
+                        value: switch (autoExecScript) {
+                          AsyncData(:final value) => value,
+                          _ => false,
+                        },
+                        onChanged: (value) async {
+                          await ref
+                              .read(autoExecScriptProvider.notifier)
+                              .set(value == true);
+                        }),
                     Text(t.autoRunScriptAfterLogin.i18n),
                     const SizedBox(
                       width: 8,
                     ),
                     DropdownButtonHideUnderline(
                       child: DropdownButton2<ScriptFile>(
-                        value: selectedScripts,
-                        items: customScripts
-                            .map((e) => DropdownMenuItem(
-                                value: e, child: Text(e.item1)))
-                            .toList(),
-                        onChanged: !autoRunScript
-                            ? null
-                            : (value) {
-                                ref
-                                    .read(selectedScriptsProvider.notifier)
-                                    .state = value;
-                              },
-                      ),
+                          value: selectedScripts,
+                          items: customScripts
+                              .map((e) => DropdownMenuItem(
+                                  value: e, child: Text(e.item1)))
+                              .toList(),
+                          onChanged: switch (autoExecScript) {
+                            AsyncData(value: final autoExec) => autoExec
+                                ? (value) {
+                                    ref
+                                        .read(selectedScriptsProvider.notifier)
+                                        .state = value;
+                                  }
+                                : null,
+                            _ => null,
+                          }
+                          // autoRunScript
+                          //     ? null
+                          //     : (value) {
+                          //         ref
+                          //             .read(selectedScriptsProvider.notifier)
+                          //             .state = value;
+                          //       },
+                          ),
                     ),
                     const SizedBox(
                       width: 8,
@@ -601,13 +632,15 @@ class MyHomePage extends HookConsumerWidget {
                                     success
                                         ? LoginState.loggedIn
                                         : LoginState.idle;
-                                if (success &&
-                                    autoRunScript &&
-                                    selectedScripts != null) {
-                                  final scripts = File(selectedScripts.item2)
-                                      .readAsLinesSync();
-                                  telnet.value?.writeMultipleLines(scripts);
-                                }
+                                autoExecScript.whenData((autoExec) {
+                                  if (success &&
+                                      autoExec &&
+                                      selectedScripts != null) {
+                                    final scripts = File(selectedScripts.item2)
+                                        .readAsLinesSync();
+                                    telnet.value?.writeMultipleLines(scripts);
+                                  }
+                                });
                               },
                             );
                             await telnet.value?.startConnect();
