@@ -635,13 +635,14 @@ class MyHomePage extends HookConsumerWidget {
                                     success
                                         ? LoginState.loggedIn
                                         : LoginState.idle;
-                                autoExecScript.whenData((autoExec) {
+                                autoExecScript.whenData((autoExec) async {
                                   if (success &&
                                       autoExec &&
                                       selectedScripts != null) {
                                     final scripts = File(selectedScripts.item2)
                                         .readAsLinesSync();
-                                    telnet.value?.writeMultipleLines(scripts);
+                                    await telnet.value
+                                        ?.writeMultipleLines(scripts);
                                   }
                                 });
                               },
