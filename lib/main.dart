@@ -177,6 +177,7 @@ List<ScriptFile> enumerateScripts() {
     }
   }
 
+  customScripts.log();
   return customScripts;
 }
 
@@ -641,6 +642,7 @@ class MyHomePage extends HookConsumerWidget {
                                       selectedScripts != null) {
                                     final scripts = File(selectedScripts.item2)
                                         .readAsLinesSync();
+                                    scripts.log();
                                     await telnet.value
                                         ?.writeMultipleLines(scripts);
                                   }
