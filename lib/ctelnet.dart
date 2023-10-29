@@ -56,6 +56,11 @@ class MyTelnetClient {
   void _onData(Message msg) {
     if (msg.isText) {
       final text = msg.text.toLowerCase();
+      final splits = text.split('\r\n');
+      for (var element
+          in splits.where((element) => element.isNotEmpty && element != '\r')) {
+        onLog?.call(LogItem.fromString("[READ] $element"));
+      }
       final item = LogItem.fromString('[Read] $text');
       onLog?.call(item);
       if (text.contains('login incorrect')) {
