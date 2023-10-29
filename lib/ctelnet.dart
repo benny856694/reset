@@ -56,6 +56,8 @@ class MyTelnetClient {
   void _onData(Message msg) {
     if (msg.isText) {
       final text = msg.text.toLowerCase();
+      final item = LogItem.fromString(text);
+      onLog?.call(item);
       if (text.contains('login incorrect')) {
         onLogin?.call(false);
       } else if (text.contains('#')) {
@@ -67,9 +69,6 @@ class MyTelnetClient {
       } else if (text.contains("password:")) {
         // Write [password].
         _client.send("$password\r\n");
-      } else {
-        final item = LogItem.fromString(text);
-        onLog?.call(item);
       }
     }
   }
