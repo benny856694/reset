@@ -56,7 +56,7 @@ class MyTelnetClient {
   void _onData(Message msg) {
     if (msg.isText) {
       final text = msg.text.toLowerCase();
-      final item = LogItem.fromString(text);
+      final item = LogItem.fromString('[Read] $text');
       onLog?.call(item);
       if (text.contains('login incorrect')) {
         onLogin?.call(false);
