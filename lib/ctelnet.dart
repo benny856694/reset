@@ -61,8 +61,6 @@ class MyTelnetClient {
           in splits.where((element) => element.isNotEmpty && element != '\r')) {
         onLog?.call(LogItem.fromString("[READ] $element"));
       }
-      final item = LogItem.fromString('[Read] $text');
-      onLog?.call(item);
       if (text.contains('login incorrect')) {
         onLogin?.call(false);
       } else if (text.contains('#')) {
