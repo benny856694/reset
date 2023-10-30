@@ -301,6 +301,7 @@ class MyHomePage extends HookConsumerWidget {
                     Text('选择脚本功能'),
                     Text('重置触屏密码功能'),
                     Text('自动保存IP地址'),
+                    Text('Telnet使用CTelnet'),
                   ],
                 );
               },
