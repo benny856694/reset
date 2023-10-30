@@ -70,11 +70,10 @@ class MyTelnetClient {
         final isReturn = _returnExp.hasMatch(c);
         if (isReturn) {
           //'[return]'.log();
-          final trimmed = _text.trim();
-          trimmed.log();
-          final replaced = trimmed.replaceAll(_unknownStringExp, '');
-          if (replaced.isNotEmpty) {
-            final item = LogItem.fromString('[READ] $replaced');
+          final filtered = _text.trim().replaceAll(_unknownStringExp, '');
+          filtered.log();
+          if (filtered.isNotEmpty) {
+            final item = LogItem.fromString('[READ] $filtered');
             onLog?.call(item);
           }
           _text = '';
