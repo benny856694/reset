@@ -606,15 +606,16 @@ class MyHomePage extends HookConsumerWidget {
               OutlinedButton.icon(
                 onPressed: loginEnabled
                     ? () async {
-                        telnet.value?.terminate();
+                        //await telnet.value?.terminate();
                         final state = ref.read(loginStateProvider.notifier);
                         if (state.state == LoginState.loggedIn) {
                           state.state = LoginState.idle;
-                        } else {
+                        } else if (state.state == LoginState.idle) {
                           logs.value = [];
                           state.state = LoginState.logging;
                           final pwd = ref.read(_passwordProvider);
                           ipAddress.whenData((ip) async {
+                            final oldClient = telnet.value;
                             telnet.value = MyTelnetClient(
                               host: ip,
                               port: 23,
@@ -622,7 +623,11 @@ class MyHomePage extends HookConsumerWidget {
                               password: pwd,
                               timeout: const Duration(seconds: 2),
                               onConnect: () {},
-                              onDisconnect: () {},
+                              onDisconnect: () {
+                                'disconnected'.log();
+                                ref.read(loginStateProvider.notifier).state =
+                                    LoginState.idle;
+                              },
                               onError: (err) {
                                 if (err is TimeoutException) {
                                   ref.read(loginStateProvider.notifier).state =
@@ -655,7 +660,9 @@ class MyHomePage extends HookConsumerWidget {
                                 });
                               },
                             );
+                            'begin connect'.log();
                             await telnet.value?.connect();
+                            oldClient?.terminate();
                           });
                         }
                       }

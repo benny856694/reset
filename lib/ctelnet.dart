@@ -1,7 +1,12 @@
 import 'package:ctelnet/ctelnet.dart';
+import 'package:flutter/material.dart';
+import 'package:reset/extensions.dart';
 
 typedef LoginCallback = void Function(bool success);
 typedef LogCallback = void Function(LogItem);
+
+final _returnExp = RegExp(r'\r\n|\r|\n');
+final _printableExp = RegExp(r'^[\x20-\x7E]+$');
 
 class LogItem {
   final int id;
@@ -29,6 +34,7 @@ class MyTelnetClient {
   final LoginCallback? onLogin;
   final LogCallback? onLog;
   bool _hasLogin = false;
+  var _text = '';
   late ITelnetClient _client;
 
   MyTelnetClient({
@@ -57,10 +63,21 @@ class MyTelnetClient {
   void _onData(Message msg) {
     if (msg.isText) {
       final text = msg.text.toLowerCase();
-      final splits = text.split('\r\n');
-      for (var element
-          in splits.where((element) => element.isNotEmpty && element != '\r')) {
-        onLog?.call(LogItem.fromString("[READ] $element"));
+      //text.characters.log();
+      for (var c in text.characters) {
+        //c.log();
+        final isReturn = _returnExp.hasMatch(c);
+        if (isReturn) {
+          //'[return]'.log();
+          final trimmed = _text.trim();
+          if (trimmed.isNotEmpty) {
+            final item = LogItem.fromString('[READ] $trimmed');
+            onLog?.call(item);
+          }
+          _text = '';
+        } else if (_printableExp.hasMatch(c)) {
+          _text += c;
+        }
       }
       if (text.contains('login incorrect')) {
         onLogin?.call(false);
@@ -98,11 +115,11 @@ class MyTelnetClient {
   Future<void> writeMultipleLines(List<String> commands) async {
     for (var cmd in commands) {
       writeline(cmd);
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 250));
     }
   }
 
-  void terminate() {
-    _client.disconnect();
+  Future terminate() async {
+    await _client.disconnect();
   }
 }
