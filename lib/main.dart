@@ -11,13 +11,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:path/path.dart' as p;
+import 'package:reset/ctelnet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:tuple/tuple.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:reset/commands.dart';
 import 'package:reset/extensions.dart';
-import 'package:reset/telnet.dart';
 
 import 'constants.dart';
 import 'main.i18n.dart' as t;
@@ -176,6 +177,7 @@ List<ScriptFile> enumerateScripts() {
     }
   }
 
+  customScripts.log();
   return customScripts;
 }
 
@@ -234,7 +236,7 @@ class MyHomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final deviceType = ref.watch(deviceTypeProvider);
     final loginState = ref.watch(loginStateProvider);
-    final telnet = useState<Telnet?>(null);
+    final telnet = useState<MyTelnetClient?>(null);
     final logs = useState(<LogItem>[]);
     final scrollController = useScrollController();
     final deviceTypeDetails = ref.watch(deviceTypeDescProvider);
@@ -604,21 +606,34 @@ class MyHomePage extends HookConsumerWidget {
               OutlinedButton.icon(
                 onPressed: loginEnabled
                     ? () async {
-                        telnet.value?.terminate();
+                        //await telnet.value?.terminate();
                         final state = ref.read(loginStateProvider.notifier);
                         if (state.state == LoginState.loggedIn) {
                           state.state = LoginState.idle;
-                        } else {
+                        } else if (state.state == LoginState.idle) {
                           logs.value = [];
                           state.state = LoginState.logging;
                           final pwd = ref.read(_passwordProvider);
                           ipAddress.whenData((ip) async {
-                            telnet.value = Telnet(
-                              ip,
-                              23,
-                              rootUserName,
-                              pwd,
-                              echoEnabled: false,
+                            final oldClient = telnet.value;
+                            telnet.value = MyTelnetClient(
+                              host: ip,
+                              port: 23,
+                              user: rootUserName,
+                              password: pwd,
+                              timeout: const Duration(seconds: 2),
+                              onConnect: () {},
+                              onDisconnect: () {
+                                'disconnected'.log();
+                                ref.read(loginStateProvider.notifier).state =
+                                    LoginState.idle;
+                              },
+                              onError: (err) {
+                                if (err is TimeoutException) {
+                                  ref.read(loginStateProvider.notifier).state =
+                                      LoginState.idle;
+                                }
+                              },
                               onLog: (log) {
                                 final maskedLog =
                                     log.log.replaceAll(pwd, '*' * pwd.length);
@@ -632,18 +647,22 @@ class MyHomePage extends HookConsumerWidget {
                                     success
                                         ? LoginState.loggedIn
                                         : LoginState.idle;
-                                autoExecScript.whenData((autoExec) {
+                                autoExecScript.whenData((autoExec) async {
                                   if (success &&
                                       autoExec &&
                                       selectedScripts != null) {
                                     final scripts = File(selectedScripts.item2)
                                         .readAsLinesSync();
-                                    telnet.value?.writeMultipleLines(scripts);
+                                    scripts.log();
+                                    await telnet.value
+                                        ?.writeMultipleLines(scripts);
                                   }
                                 });
                               },
                             );
-                            await telnet.value?.startConnect();
+                            'begin connect'.log();
+                            await telnet.value?.connect();
+                            oldClient?.terminate();
                           });
                         }
                       }
