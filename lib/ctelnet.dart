@@ -7,6 +7,7 @@ typedef LogCallback = void Function(LogItem);
 
 final _returnExp = RegExp(r'\r\n|\r|\n');
 final _printableExp = RegExp(r'^[\x20-\x7E]+$');
+final _unknownStringExp = RegExp(r'\[[0-9](;?[0-9]*)m');
 
 class LogItem {
   final int id;
@@ -70,8 +71,10 @@ class MyTelnetClient {
         if (isReturn) {
           //'[return]'.log();
           final trimmed = _text.trim();
-          if (trimmed.isNotEmpty) {
-            final item = LogItem.fromString('[READ] $trimmed');
+          trimmed.log();
+          final replaced = trimmed.replaceAll(_unknownStringExp, '');
+          if (replaced.isNotEmpty) {
+            final item = LogItem.fromString('[READ] $replaced');
             onLog?.call(item);
           }
           _text = '';
