@@ -623,7 +623,12 @@ class MyHomePage extends HookConsumerWidget {
                               timeout: const Duration(seconds: 2),
                               onConnect: () {},
                               onDisconnect: () {},
-                              onError: (msg) {},
+                              onError: (err) {
+                                if (err is TimeoutException) {
+                                  ref.read(loginStateProvider.notifier).state =
+                                      LoginState.idle;
+                                }
+                              },
                               onLog: (log) {
                                 final maskedLog =
                                     log.log.replaceAll(pwd, '*' * pwd.length);

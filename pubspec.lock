@@ -117,10 +117,10 @@ packages:
     dependency: "direct main"
     description:
       name: ctelnet
-      sha256: "06b203b33a8cc3da3cd1d464deeb5e80f0a70ba98e68b8c25d9ffbf058437d7f"
+      sha256: "1d52379ae06220014d34bdba35a5d685a8fbb7a9b0ca94f9a2446dd95fb6ea0f"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.1.5"
+    version: "0.1.6"
   cupertino_icons:
     dependency: "direct main"
     description:

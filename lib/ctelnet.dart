@@ -65,8 +65,10 @@ class MyTelnetClient {
       if (text.contains('login incorrect')) {
         onLogin?.call(false);
       } else if (text.contains('#')) {
-        _hasLogin = true;
-        onLogin?.call(true);
+        if (!_hasLogin) {
+          _hasLogin = true;
+          onLogin?.call(true);
+        }
       } else if (text.contains("login:") || text.contains("username:")) {
         // Write [username].
         _client.send("$user\r\n");

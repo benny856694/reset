@@ -50,7 +50,7 @@ dependencies:
   dropdown_button2: ^2.3.9
   url_launcher: ^6.1.9
   shared_preferences: ^2.2.2
-  ctelnet: ^0.1.5
+  ctelnet: ^0.1.6
 
 dev_dependencies:
   flutter_test:
