@@ -19,11 +19,11 @@ class DeviceList extends HookConsumerWidget {
       appBar: AppBar(
         title: Text(t.deviceListTitle.i18n),
         actions: [
-          InkWell(
-            child: const Icon(Icons.refresh),
-            onTap: () {
+          IconButton(
+            onPressed: () {
               ref.invalidate(devicesListProvider);
             },
+            icon: const Icon(Icons.refresh),
           ),
           const SizedBox(
             width: 8,
@@ -38,11 +38,11 @@ class DeviceList extends HookConsumerWidget {
             return ListTile(
               title: Text('${d.ip} - ${d.mac}'),
               subtitle: Text(d.platform),
-              onTap: () {
-                d.ip.log();
-                ref.read(ipAddressProvider.notifier).set(d.ip);
-                ref.invalidate(ipAddressProvider);
-                Navigator.pop(context);
+              onTap: () async {
+                await ref.read(ipAddressProvider.notifier).set(d.ip);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
             );
           }),

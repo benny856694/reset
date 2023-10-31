@@ -117,7 +117,6 @@ class AsyncPrefValueNotifier<T> extends AsyncNotifier<T> {
     };
 
     final res = value as T;
-    'featch $key:$res'.log();
     return res;
   }
 
@@ -127,8 +126,6 @@ class AsyncPrefValueNotifier<T> extends AsyncNotifier<T> {
   }
 
   Future<void> set(T value) async {
-    "in set".log();
-    value?.log();
     final _ = switch (T) {
       String => await _prefs.setString(key, value as String),
       bool => await _prefs.setBool(key, value as bool),
@@ -259,24 +256,16 @@ class MyHomePage extends HookConsumerWidget {
         useState(I18n.localeStr.contains('zh') ? chinese : english);
     final customScripts = ref.watch(customScriptsProvider);
     final ipAddress = ref.watch(ipAddressProvider);
-    'build->ip:$ipAddress'.log();
-    final ipAddressEditController = useTextEditingController(
-      text: ipAddress.when(
-        data: (data) {
-          'when data: $data'.log();
-          return data;
-        },
-        error: (error, s) {
-          "error branch".log();
-          return null;
-        },
-        loading: () {
-          "loading branch".log();
-          return null;
-        },
-      ),
-    );
-    ipAddressEditController.log();
+    final initalValue = switch (ipAddress) {
+      AsyncData(:final value) => value,
+      _ => null,
+    };
+    final ipAddressEditController = useTextEditingController();
+
+    useEffect(() {
+      ipAddressEditController.text = initalValue ?? '';
+      return null;
+    }, [initalValue]);
     final autoExecScript = ref.watch(autoExecScriptProvider);
 
     ref.listen(
@@ -365,16 +354,15 @@ class MyHomePage extends HookConsumerWidget {
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                     label: Text(t.ipAddress.i18n),
-                    suffixIcon: InkWell(
-                      child: const Icon(Icons.search),
-                      onTap: () async {
-                        await ref
-                            .read(ipAddressProvider.notifier)
-                            .set("127.0.0.1");
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: (ctx) => const DeviceList()));
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.search),
+                      onPressed: () async {
+                        if (context.mounted) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (ctx) => const DeviceList()));
+                        }
                       },
                     )),
                 onChanged: (value) async {
