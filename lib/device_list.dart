@@ -50,7 +50,9 @@ class DeviceList extends HookConsumerWidget {
                 ),
               ),
               onTap: () async {
+                ref.read(selectedDeviceProvider.notifier).state = d;
                 await ref.read(ipAddressProvider.notifier).set(d.ip);
+
                 if (context.mounted) {
                   Navigator.pop(context);
                 }

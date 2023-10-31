@@ -12,6 +12,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:path/path.dart' as p;
 import 'package:reset/ctelnet.dart';
+import 'package:reset/device_discovery.dart';
 import 'package:reset/device_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,7 +35,30 @@ const rootUserName = 'root';
 final ipAddressExp = RegExp(
     r'\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b');
 
-final deviceTypeProvider = StateProvider((_) => DeviceType.oldModel);
+final selectedDeviceProvider = StateProvider<Device?>((ref) {
+  return null;
+});
+
+final deviceTypeProvider = StateProvider((ref) {
+  final selDevice = ref.watch(selectedDeviceProvider);
+  'selDevice $selDevice'.log();
+  if (selDevice == null) {
+    return DeviceType.newModel;
+  }
+
+  final oldDevices = t.oldModelDetails.i18n.replaceAll(' ', '').split(',');
+  final newDevices = t.newModelDetails.i18n.replaceAll(' ', '').split(',');
+
+  if (oldDevices
+      .any((element) => selDevice.platform.toUpperCase().contains(element))) {
+    return DeviceType.oldModel;
+  } else if (newDevices
+      .any((element) => selDevice.platform.toUpperCase().contains(element))) {
+    return DeviceType.newModel;
+  }
+
+  return DeviceType.newModel;
+});
 final _currentCustomPasswordProvider = StateProvider((_) => '');
 final _passwordProvider = Provider<String>((ref) {
   final dt = ref.watch(deviceTypeProvider);
@@ -266,6 +290,7 @@ class MyHomePage extends HookConsumerWidget {
       ipAddressEditController.text = initalValue ?? '';
       return null;
     }, [initalValue]);
+
     final autoExecScript = ref.watch(autoExecScriptProvider);
 
     ref.listen(
