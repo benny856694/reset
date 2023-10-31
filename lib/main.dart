@@ -12,6 +12,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:path/path.dart' as p;
 import 'package:reset/ctelnet.dart';
+import 'package:reset/device_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tuple/tuple.dart';
@@ -115,7 +116,9 @@ class AsyncPrefValueNotifier<T> extends AsyncNotifier<T> {
       _ => throw Exception('not supported type'),
     };
 
-    return value as T;
+    final res = value as T;
+    'featch $key:$res'.log();
+    return res;
   }
 
   @override
@@ -124,6 +127,8 @@ class AsyncPrefValueNotifier<T> extends AsyncNotifier<T> {
   }
 
   Future<void> set(T value) async {
+    "in set".log();
+    value?.log();
     final _ = switch (T) {
       String => await _prefs.setString(key, value as String),
       bool => await _prefs.setBool(key, value as bool),
@@ -254,6 +259,24 @@ class MyHomePage extends HookConsumerWidget {
         useState(I18n.localeStr.contains('zh') ? chinese : english);
     final customScripts = ref.watch(customScriptsProvider);
     final ipAddress = ref.watch(ipAddressProvider);
+    'build->ip:$ipAddress'.log();
+    final ipAddressEditController = useTextEditingController(
+      text: ipAddress.when(
+        data: (data) {
+          'when data: $data'.log();
+          return data;
+        },
+        error: (error, s) {
+          "error branch".log();
+          return null;
+        },
+        loading: () {
+          "loading branch".log();
+          return null;
+        },
+      ),
+    );
+    ipAddressEditController.log();
     final autoExecScript = ref.watch(autoExecScriptProvider);
 
     ref.listen(
@@ -338,15 +361,22 @@ class MyHomePage extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               TextField(
-                controller: switch (ipAddress) {
-                  AsyncData(:final value) =>
-                    useTextEditingController(text: value),
-                  _ => null,
-                },
+                controller: ipAddressEditController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  label: Text(t.ipAddress.i18n),
-                ),
+                    label: Text(t.ipAddress.i18n),
+                    suffixIcon: InkWell(
+                      child: const Icon(Icons.search),
+                      onTap: () async {
+                        await ref
+                            .read(ipAddressProvider.notifier)
+                            .set("127.0.0.1");
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (ctx) => const DeviceList()));
+                      },
+                    )),
                 onChanged: (value) async {
                   value.log();
                   await ref.read(ipAddressProvider.notifier).set(value);
