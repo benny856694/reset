@@ -39,15 +39,15 @@ final selectedDeviceProvider = StateProvider<Device?>((ref) {
   return null;
 });
 
+final oldDevices = t.oldModelDetails.i18n.replaceAll(' ', '').split(',');
+final newDevices = t.newModelDetails.i18n.replaceAll(' ', '').split(',');
+
 final deviceTypeProvider = StateProvider((ref) {
   final selDevice = ref.watch(selectedDeviceProvider);
   'selDevice $selDevice'.log();
   if (selDevice == null) {
     return DeviceType.newModel;
   }
-
-  final oldDevices = t.oldModelDetails.i18n.replaceAll(' ', '').split(',');
-  final newDevices = t.newModelDetails.i18n.replaceAll(' ', '').split(',');
 
   if (oldDevices
       .any((element) => selDevice.platform.toUpperCase().contains(element))) {
