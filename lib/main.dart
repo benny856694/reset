@@ -12,6 +12,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:i18n_extension/i18n_widget.dart';
 import 'package:path/path.dart' as p;
 import 'package:reset/ctelnet.dart';
+import 'package:reset/device_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tuple/tuple.dart';
@@ -115,7 +116,8 @@ class AsyncPrefValueNotifier<T> extends AsyncNotifier<T> {
       _ => throw Exception('not supported type'),
     };
 
-    return value as T;
+    final res = value as T;
+    return res;
   }
 
   @override
@@ -254,6 +256,16 @@ class MyHomePage extends HookConsumerWidget {
         useState(I18n.localeStr.contains('zh') ? chinese : english);
     final customScripts = ref.watch(customScriptsProvider);
     final ipAddress = ref.watch(ipAddressProvider);
+    final initalValue = switch (ipAddress) {
+      AsyncData(:final value) => value,
+      _ => null,
+    };
+    final ipAddressEditController = useTextEditingController();
+
+    useEffect(() {
+      ipAddressEditController.text = initalValue ?? '';
+      return null;
+    }, [initalValue]);
     final autoExecScript = ref.watch(autoExecScriptProvider);
 
     ref.listen(
@@ -338,15 +350,21 @@ class MyHomePage extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               TextField(
-                controller: switch (ipAddress) {
-                  AsyncData(:final value) =>
-                    useTextEditingController(text: value),
-                  _ => null,
-                },
+                controller: ipAddressEditController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  label: Text(t.ipAddress.i18n),
-                ),
+                    label: Text(t.ipAddress.i18n),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.search),
+                      onPressed: () async {
+                        if (context.mounted) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (ctx) => const DeviceList()));
+                        }
+                      },
+                    )),
                 onChanged: (value) async {
                   value.log();
                   await ref.read(ipAddressProvider.notifier).set(value);

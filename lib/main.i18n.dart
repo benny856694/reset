@@ -28,6 +28,7 @@ const autoRunScriptAfterLogin = 'autoRunScript';
 const edit = 'edit';
 const resetTouchScreenPwds = 'resetTouchScreenPwds';
 const reload = 'reload';
+const deviceListTitle = 'discoveryDevices';
 
 extension Localization on String {
   static const _t = Translations.from("zh", {
@@ -142,6 +143,10 @@ extension Localization on String {
     resetTouchScreenPwds: {
       "en": "Reset Touch Pwds",
       "zh": "重置触屏密码",
+    },
+    deviceListTitle: {
+      "en": "Device List",
+      "zh": "搜索设备",
     },
   });
 
