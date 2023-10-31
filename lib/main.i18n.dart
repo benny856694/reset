@@ -29,6 +29,7 @@ const edit = 'edit';
 const resetTouchScreenPwds = 'resetTouchScreenPwds';
 const reload = 'reload';
 const deviceListTitle = 'discoveryDevices';
+const openInWebBrowser = 'openInWebBrowser';
 
 extension Localization on String {
   static const _t = Translations.from("zh", {
@@ -148,6 +149,10 @@ extension Localization on String {
       "en": "Device List",
       "zh": "搜索设备",
     },
+    openInWebBrowser: {
+      "zh": "在浏览器中打开",
+      "en": "Open in Web Browser",
+    }
   });
 
   String get i18n => localize(this, _t);

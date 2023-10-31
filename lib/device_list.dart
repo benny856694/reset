@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reset/device_discovery.dart';
 import 'package:reset/extensions.dart';
 import 'package:reset/main.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'main.i18n.dart' as t;
 
 final devicesListProvider = FutureProvider<List<Device>>((ref) async {
@@ -38,6 +39,16 @@ class DeviceList extends HookConsumerWidget {
             return ListTile(
               title: Text('${d.ip} - ${d.mac}'),
               subtitle: Text(d.platform),
+              trailing: Tooltip(
+                message: t.openInWebBrowser.i18n,
+                child: IconButton(
+                  onPressed: () async {
+                    final url = Uri.parse("http://${d.ip}");
+                    await launchUrl(url);
+                  },
+                  icon: const Icon(Icons.open_in_new),
+                ),
+              ),
               onTap: () async {
                 await ref.read(ipAddressProvider.notifier).set(d.ip);
                 if (context.mounted) {

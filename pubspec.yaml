@@ -48,7 +48,7 @@ dependencies:
   path: ^1.8.2
   tuple: ^2.0.1
   dropdown_button2: ^2.3.9
-  url_launcher: ^6.1.9
+  url_launcher: ^6.2.1
   shared_preferences: ^2.2.2
   ctelnet: ^0.1.6
 
